@@ -78,4 +78,78 @@
             ["李嘉豪", "0925", 20.5, 73.5, 26],
             ["李嘉俊", "1103", 72, 85.5, 73.8],
             ["李俊良", "0201", 57.5, 65.5, 39.5],
-            ["李圣
+            ["李圣标", "0925", 80.5, 76.5, 55.5],
+            ["李思霖", "0906", 56.5, 66, 27],
+            ["李彦忻", "0310", 79.5, 96, 89],
+            ["廖盈潞", "0620", 80, 91, 92.5],
+            ["林博文", "0707", 26, 18, 20],
+            ["林嘉杰", "1228", 87.8, 87, 97],
+            ["林心怡", "0320", 60.5, 71.5, 35],
+            ["林振轩", "0226", 85.8, 99, 99.8],
+            ["凌静怡", "0629", 87.5, 95, 98.5],
+            ["刘辰宇", "0422", 84.3, 33.5, 47.3],
+            ["刘馥源", "0516", 62.5, 74, 34.5],
+            ["刘家权", "1204", 54, 65.5, 43],
+            ["刘能康", "0327", 42, 50, 28],
+            ["刘润东", "0823", 62.5, 48, 37],
+            ["刘晓宇", "1120", 72, 66, 53],
+            ["刘欣怡", "0716", 66.5, 83, 23.5],
+            ["刘妤裴", "0611", 84.5, 82.5, 92.3],
+            ["刘育铭", "0208", 15, 10, 20]
+        ];
+
+        // --- 程序逻辑区 ---
+        const studentData = rawData.map(row => {
+            // 自动修复生日
+            let birth = String(row[1]).trim();
+            if (birth.length === 3) birth = "0" + birth; // 补齐3位生日的0
+            
+            const yw = parseFloat(row[2]) || 0;
+            const sx = parseFloat(row[3]) || 0;
+            const yy = parseFloat(row[4]) || 0;
+            const avg = (yw + sx + yy) / 3;
+
+            return {
+                name: String(row[0]).trim(),
+                birth: birth,
+                score: `语文：${yw}<br>数学：${sx}<br>英语：${yy}`,
+                num: avg
+            };
+        });
+
+        function checkGrade() {
+            const name = document.getElementById('nameInput').value.trim();
+            const birth = document.getElementById('birthInput').value.trim();
+            const resultDiv = document.getElementById('result');
+            const nameDiv = document.getElementById('nameDisplay');
+            const scoreDiv = document.getElementById('scoreDisplay');
+            const btn = document.getElementById('searchBtn');
+
+            if (!name || !birth) { alert("🐰 姓名和生日都要填哦！"); return; }
+            
+            btn.disabled = true; btn.innerText = "🔮 正在施法...";
+            resultDiv.style.display = "none"; resultDiv.className = "result-area";
+
+            setTimeout(() => {
+                btn.disabled = false; btn.innerText = "✨ 查询 ✨";
+                const found = studentData.find(s => s.name === name && s.birth === birth);
+                resultDiv.style.display = "block";
+                
+                if (found) {
+                    nameDiv.innerHTML = "🎉 学员: " + found.name;
+                    scoreDiv.innerHTML = found.score;
+                    if (found.num >= 90) resultDiv.classList.add("rank-s");
+                    else if (found.num >= 80) resultDiv.classList.add("rank-a");
+                    else if (found.num >= 60) resultDiv.classList.add("rank-b");
+                    else resultDiv.classList.add("rank-c");
+                } else {
+                    resultDiv.style.background = "#f5f6fa";
+                    resultDiv.style.border = "2px dashed #dcdde1";
+                    nameDiv.innerHTML = "🍃 哎呀...";
+                    scoreDiv.innerHTML = `找不到该信息<br>输入: ${name} / ${birth}<br>请确认生日是4位数字`;
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
