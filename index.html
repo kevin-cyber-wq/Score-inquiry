@@ -9,6 +9,8 @@
     
     <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <style>
         /* --- 核心主题 CSS --- */
         body { 
@@ -20,6 +22,7 @@
             font-family: "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif; 
             margin: 0; 
             -webkit-tap-highlight-color: transparent;
+            overflow: hidden; /* 防止烟花撑开滚动条 */
         }
 
         .card { 
@@ -31,12 +34,14 @@
             width: 320px; 
             border: 1px solid rgba(255, 255, 255, 0.6);
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 10; /* 保证卡片在烟花上面 */
         }
 
         h1 { color: #ff6b81; font-size: 24px; margin-bottom: 5px; letter-spacing: 1px; }
         p.subtitle { color: #a4b0be; font-size: 13px; margin-bottom: 18px; }
         
-        /* ⬢ 极简系统状态栏 */
+        /* ⬢ 系统状态栏 */
         .system-status {
             display: flex;
             justify-content: center;
@@ -53,7 +58,6 @@
         .status-item { display: flex; align-items: center; gap: 5px; }
         .data-num { font-weight: 600; color: #2f3542; }
 
-        /* 🟢 经典绿色呼吸灯 */
         .live-dot {
             width: 6px; height: 6px; background: #2ecc71; border-radius: 50%;
             box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
@@ -69,7 +73,6 @@
         }
         input:focus { border-color: #ff9a9e; box-shadow: 0 0 8px rgba(255, 154, 158, 0.15); }
 
-        /* 错误反馈动画 */
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-4px); } 60% { transform: translateX(4px); } }
         .input-error { animation: shake 0.3s ease-in-out; border-color: #ff6b81; }
 
@@ -86,7 +89,7 @@
         .student-name { font-size: 19px; font-weight: bold; margin-bottom: 8px; color: #2f3542; }
         .scores { line-height: 1.8; font-size: 15px; color: #57606f; }
         
-        /* 段位特效 (基于总分) */
+        /* 段位卡片样式 */
         @keyframes jelly { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
         .rank-s { background: #fff9db; border: 1.5px solid #fcc419; animation: jelly 0.7s forwards; } .rank-s::after { content: "👑 荣耀时刻"; display: block; margin-top: 8px; font-size: 11px; color: #fcc419; font-weight: bold; }
         .rank-a { background: #e7f5ff; border: 1.5px solid #339af0; animation: jelly 0.6s forwards; } .rank-a::after { content: "🚀 乘风破浪"; display: block; margin-top: 8px; font-size: 11px; color: #339af0; font-weight: bold; }
@@ -94,7 +97,10 @@
         .rank-c { background: #fff5f5; border: 1.5px solid #ff8787; animation: jelly 0.6s forwards; } .rank-c::after { content: "⚡ 蓄势待发"; display: block; margin-top: 8px; font-size: 11px; color: #ff8787; font-weight: bold; }
         
         .not-found { background: #f8f9fa; border: 1.5px dashed #dee2e6; color: #495057; animation: jelly 0.5s forwards; }
-        .help-box { margin-top: 12px; background: #fff; padding: 10px; border-radius: 12px; border: 1px solid #ffecf0; color: #fa5252; font-size: 13px; }
+        .err-name { background: #fff5f5; border: 1.5px dashed #ffc9c9; }
+        .err-birth { background: #fff8e1; border: 1.5px dashed #ffe066; }
+        
+        .help-box { margin-top: 12px; background: #fff; padding: 10px; border-radius: 12px; border: 1px solid #f1f2f6; color: #7f8c8d; font-size: 13px; }
         .teacher-name { font-weight: bold; color: #ff6b81; }
 
         .copyright { margin-top: 35px; font-size: 10px; color: #d1d8e0; letter-spacing: 0.8px; text-transform: uppercase; }
@@ -136,9 +142,9 @@
     </div>
 
     <script>
-        // --- 🟢 核心数据库 (50位同学数据) ---
+        // --- 🟢 核心数据库 (50位同学) ---
         const rawData = [
-            ["肖凯文", "1120", 90.5, 94, 94.5], ["曹晞宣", "0409", 84, 99, 95], ["陈好", "0110", 74.5, 95, 92],
+            ["曹天佑", "1211", 83.5, 94, 74.5], ["曹晞宣", "0409", 84, 99, 95], ["陈好", "0110", 74.5, 95, 92],
             ["陈佳星", "0826", 86.5, 100, 77.5], ["陈思耀", "0427", 79.5, 76.5, 87.3], ["陈宇浩", "0623", 79.5, 88, 28],
             ["陈梓仪", "0920", 4, 7, 21.5], ["戴诗宸", "1124", 35.5, 17.5, 19.5], ["邓楚和", "0630", 32, 29, 22],
             ["邓恒", "0523", 84.3, 93.5, 98], ["邓苏嵘", "0401", 78.8, 93.5, 52], ["邓新乐", "1001", 13, 39.5, 19.5],
@@ -168,6 +174,53 @@
         document.getElementById('dataCount').innerText = db.length;
         document.addEventListener('keydown', (e) => { if(e.key === "Enter") checkGrade(); });
 
+        // --- 🎉 全屏特效控制器 ---
+        function triggerFireworks() {
+            var duration = 3000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) { return clearInterval(interval); }
+                var particleCount = 50 * (timeLeft / duration);
+                // 两个发射点，左右开弓
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: 0.1, y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: 0.9, y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
+        function triggerStreamers() {
+            var end = Date.now() + 1000;
+            var colors = ['#64b5f6', '#ffd700'];
+            (function frame() {
+                confetti({
+                    particleCount: 2, angle: 60, spread: 55, origin: { x: 0 }, colors: colors, zIndex: 0
+                });
+                confetti({
+                    particleCount: 2, angle: 120, spread: 55, origin: { x: 1 }, colors: colors, zIndex: 0
+                });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        function triggerStars() {
+            var defaults = { spread: 360, ticks: 100, gravity: 0.3, decay: 0.94, startVelocity: 15, shapes: ['star'], colors: ['#FFE100', '#FFBB00', '#FF9500'], zIndex: 0 };
+            confetti(Object.assign({}, defaults, { particleCount: 30, scalar: 1.2, flat: true, origin: { y: 0.4 } }));
+            confetti(Object.assign({}, defaults, { particleCount: 15, scalar: 0.8, flat: true, origin: { y: 0.4 } }));
+        }
+
+        function triggerSakura() {
+            var end = Date.now() + 3000;
+            var colors = ['#ffc0cb', '#ffb7b2'];
+            (function frame() {
+                confetti({
+                    particleCount: 2, angle: 270, spread: 120, startVelocity: 15, origin: { y: -0.1 }, 
+                    colors: colors, shapes: ['circle'], scalar: 0.8, drift: 0.5, gravity: 0.8, ticks: 300, zIndex: 0
+                });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
         function checkGrade() {
             const nameEl = document.getElementById('nameInput');
             const birthEl = document.getElementById('birthInput');
@@ -175,7 +228,6 @@
             const nameDiv = document.getElementById('nameDisplay');
             const scoreDiv = document.getElementById('scoreDisplay');
             const btn = document.getElementById('searchBtn');
-
             const name = nameEl.value.trim();
             const birth = birthEl.value.trim();
 
@@ -187,21 +239,43 @@
 
             setTimeout(() => {
                 btn.disabled = false; btn.innerText = "✨ 查询 ✨";
-                const found = db.find(s => s.n === name && s.b === birth);
-                resultDiv.style.display = "block";
                 
-                if (found) {
-                    nameDiv.innerHTML = "🎉 " + found.n + " 同学";
-                    scoreDiv.innerHTML = found.s;
-                    if (found.t >= 270) resultDiv.classList.add("rank-s");
-                    else if (found.t >= 240) resultDiv.classList.add("rank-a");
-                    else if (found.t >= 180) resultDiv.classList.add("rank-b");
-                    else resultDiv.classList.add("rank-c");
+                // 1. 精确诊断
+                const targetStudent = db.find(s => s.n === name);
+                
+                if (targetStudent) {
+                    if (targetStudent.b === birth) {
+                        // --- 🟢 成功！触发特效 ---
+                        resultDiv.style.display = "block";
+                        nameDiv.innerHTML = "🎉 " + targetStudent.n + " 同学";
+                        scoreDiv.innerHTML = targetStudent.s;
+
+                        if (targetStudent.t >= 270) {
+                            resultDiv.classList.add("rank-s");
+                            triggerFireworks(); // 🏆 烟花雨
+                        } else if (targetStudent.t >= 240) {
+                            resultDiv.classList.add("rank-a");
+                            triggerStreamers(); // 🚀 礼炮彩带
+                        } else if (targetStudent.t >= 180) {
+                            resultDiv.classList.add("rank-b");
+                            triggerStars(); // ✨ 星星散落
+                        } else {
+                            resultDiv.classList.add("rank-c");
+                            triggerSakura(); // 🌸 樱花漫天 (治愈系)
+                        }
+                    } else {
+                        // 🟡 名字对，生日错
+                        resultDiv.style.display = "block";
+                        resultDiv.classList.add("not-found", "err-birth");
+                        nameDiv.innerHTML = "🔒 验证失败";
+                        scoreDiv.innerHTML = `已找到 <strong>${name}</strong> 同学的档案，<br>但你输入的生日口令 <strong>${birth}</strong> 不正确。<div class="help-box">请检查：是4位数字吗？(例如 0101)</div>`;
+                    }
                 } else {
-                    resultDiv.classList.add("not-found");
-                    nameDiv.innerHTML = "🤔 检索未匹配";
-                    scoreDiv.innerHTML = `数据库中未检索到相关信息。<br>请核对姓名和4位生日。
-                        <div class="help-box">💡 还是查不到？<br>别着急，快去私聊 <span class="teacher-name">凯文老师</span> 吧！</div>`;
+                    // 🔴 名字没找到
+                    resultDiv.style.display = "block";
+                    resultDiv.classList.add("not-found", "err-name");
+                    nameDiv.innerHTML = "🚫 档案未找到";
+                    scoreDiv.innerHTML = `数据库中没有找到名为 <strong>${name}</strong> 的学生。<br>请核对姓名是否输入正确。<div class="help-box">💡 如有疑问，请私聊 <span class="teacher-name">凯文老师</span></div>`;
                 }
             }, 600);
         }
