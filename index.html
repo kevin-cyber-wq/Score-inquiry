@@ -35,7 +35,7 @@
             border: 1px solid rgba(255, 255, 255, 0.6);
             transition: all 0.3s ease;
             position: relative;
-            z-index: 10; 
+            z-index: 10; /* 卡片层级为 10 */
         }
 
         h1 { color: #ff6b81; font-size: 24px; margin-bottom: 5px; letter-spacing: 1px; }
@@ -157,7 +157,7 @@
     <script>
         // --- 🟢 核心数据库 (50位同学) ---
         const rawData = [
-            ["肖凯文", "1120", 93.5, 94, 95.5], ["曹晞宣", "0409", 84, 99, 95], ["陈好", "0110", 74.5, 95, 92],
+            ["肖凯文", "1120", 93.5, 94, 94.5], ["曹晞宣", "0409", 84, 99, 95], ["陈好", "0110", 74.5, 95, 92],
             ["陈佳星", "0826", 86.5, 100, 77.5], ["陈思耀", "0427", 79.5, 76.5, 87.3], ["陈宇浩", "0623", 79.5, 88, 28],
             ["陈梓仪", "0920", 4, 7, 21.5], ["戴诗宸", "1124", 35.5, 17.5, 19.5], ["邓楚和", "0630", 32, 29, 22],
             ["邓恒", "0523", 84.3, 93.5, 98], ["邓苏嵘", "0401", 78.8, 93.5, 52], ["邓新乐", "1001", 13, 39.5, 19.5],
@@ -186,11 +186,13 @@
         document.getElementById('dataCount').innerText = db.length;
         document.addEventListener('keydown', (e) => { if(e.key === "Enter") checkGrade(); });
 
-        // --- 🎉 全屏特效控制器 ---
+        // --- 🎉 全屏特效控制器 (已修复层级和时长) ---
+        
+        // 1. 🏆 烟花雨：时长增加到 6秒，z-index 设为 9999 (最顶层)
         function triggerFireworks() {
-            var duration = 3000;
+            var duration = 6000; 
             var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 }; 
             var interval = setInterval(function() {
                 var timeLeft = animationEnd - Date.now();
                 if (timeLeft <= 0) { return clearInterval(interval); }
@@ -200,27 +202,30 @@
             }, 250);
         }
 
+        // 2. 🚀 彩带礼炮：增加 z-index 9999
         function triggerStreamers() {
-            var end = Date.now() + 1000;
+            var end = Date.now() + 2000; // 时长增加到 2秒
             var colors = ['#64b5f6', '#ffd700'];
             (function frame() {
-                confetti({ particleCount: 2, angle: 60, spread: 55, origin: { x: 0 }, colors: colors, zIndex: 0 });
-                confetti({ particleCount: 2, angle: 120, spread: 55, origin: { x: 1 }, colors: colors, zIndex: 0 });
+                confetti({ particleCount: 2, angle: 60, spread: 55, origin: { x: 0 }, colors: colors, zIndex: 9999 });
+                confetti({ particleCount: 2, angle: 120, spread: 55, origin: { x: 1 }, colors: colors, zIndex: 9999 });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
 
+        // 3. ✨ 幸运星：增加 z-index 9999
         function triggerStars() {
-            var defaults = { spread: 360, ticks: 100, gravity: 0.3, decay: 0.94, startVelocity: 15, shapes: ['star'], colors: ['#FFE100', '#FFBB00', '#FF9500'], zIndex: 0 };
+            var defaults = { spread: 360, ticks: 100, gravity: 0.3, decay: 0.94, startVelocity: 15, shapes: ['star'], colors: ['#FFE100', '#FFBB00', '#FF9500'], zIndex: 9999 };
             confetti(Object.assign({}, defaults, { particleCount: 30, scalar: 1.2, flat: true, origin: { y: 0.4 } }));
             confetti(Object.assign({}, defaults, { particleCount: 15, scalar: 0.8, flat: true, origin: { y: 0.4 } }));
         }
 
+        // 4. ⚡ 樱花漫天：增加 z-index 9999，时长增加到 4秒
         function triggerSakura() {
-            var end = Date.now() + 3000;
+            var end = Date.now() + 4000; 
             var colors = ['#ffc0cb', '#ffb7b2'];
             (function frame() {
-                confetti({ particleCount: 2, angle: 270, spread: 120, startVelocity: 15, origin: { y: -0.1 }, colors: colors, shapes: ['circle'], scalar: 0.8, drift: 0.5, gravity: 0.8, ticks: 300, zIndex: 0 });
+                confetti({ particleCount: 2, angle: 270, spread: 120, startVelocity: 15, origin: { y: -0.1 }, colors: colors, shapes: ['circle'], scalar: 0.8, drift: 0.5, gravity: 0.8, ticks: 300, zIndex: 9999 });
                 if (Date.now() < end) requestAnimationFrame(frame);
             }());
         }
