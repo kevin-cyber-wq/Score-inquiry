@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>✨ 魔法成绩屋 ✨</title>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         /* --- 样式区 --- */
         body { background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; margin: 0; }
-        .card { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 320px; border: 4px solid #fff; position: relative; }
+        .card { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 320px; border: 4px solid #fff; }
         h1 { color: #ff6b81; font-size: 24px; margin-bottom: 5px; }
         p.subtitle { color: #a4b0be; font-size: 14px; margin-bottom: 25px; }
         .input-group { margin-bottom: 15px; }
@@ -21,9 +20,6 @@
         .student-name { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #333; }
         .scores { line-height: 1.8; font-size: 16px; color: #555; }
         .footer-credit { margin-top: 25px; font-size: 12px; color: #dfe6e9; letter-spacing: 1px; }
-        
-        /* 状态提示条 */
-        #status-bar { font-size: 12px; color: #aaa; margin-top: 10px; }
 
         /* 动画样式 */
         @keyframes jelly { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
@@ -40,9 +36,6 @@
         <div class="input-group"><input type="text" id="nameInput" placeholder="请输入姓名"></div>
         <div class="input-group"><input type="tel" id="birthInput" placeholder="请输入4位生日 (如: 0101)" maxlength="4"></div>
         <button id="searchBtn" onclick="checkGrade()">✨ 查询 ✨</button>
-        
-        <div id="status-bar">正在连接数据...</div>
-
         <div id="result" class="result-area">
             <div id="nameDisplay" class="student-name"></div>
             <div id="scoreDisplay" class="scores"></div>
@@ -51,86 +44,38 @@
     </div>
 
     <script>
-        let studentData = [];
-        const statusDiv = document.getElementById('status-bar');
-
-        // 加载 Excel
-        fetch('data.xlsx?v=' + new Date().getTime())
-            .then(response => {
-                if (!response.ok) throw new Error("文件名不对或文件未上传");
-                return response.arrayBuffer();
-            })
-            .then(data => {
-                const workbook = XLSX.read(data, { type: 'array' });
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-                studentData = jsonData.map(row => {
-                    const yw = parseFloat(row['语文']) || 0;
-                    const sx = parseFloat(row['数学']) || 0;
-                    const yy = parseFloat(row['英语']) || 0;
-                    const avg = (yw + sx + yy) / 3;
-
-                    // --- 核心修复：自动给生日补0 ---
-                    // 如果读出来是 101，自动变成 "0101"
-                    let birthStr = String(row['生日'] || "").trim();
-                    if (birthStr.length === 3) birthStr = "0" + birthStr; 
-
-                    return {
-                        name: String(row['姓名'] || "").trim(),
-                        birth: birthStr, 
-                        score: `语文：${row['语文'] || '-'}<br>数学：${row['数学'] || '-'}<br>英语：${row['英语'] || '-'}`,
-                        num: avg
-                    };
-                });
-                
-                // 状态栏提示成功
-                statusDiv.innerText = `✅ 成功加载 ${studentData.length} 位同学数据`;
-                statusDiv.style.color = "#4caf50"; // 绿色
-            })
-            .catch(err => {
-                console.error(err);
-                statusDiv.innerHTML = "❌ <b>数据加载失败</b><br>请检查 GitHub 里是否有名为 data.xlsx 的文件";
-                statusDiv.style.color = "#f44336"; // 红色
-            });
-
-        function checkGrade() {
-            const name = document.getElementById('nameInput').value.trim();
-            const birth = document.getElementById('birthInput').value.trim();
-            const resultDiv = document.getElementById('result');
-            const nameDiv = document.getElementById('nameDisplay');
-            const scoreDiv = document.getElementById('scoreDisplay');
-            const btn = document.getElementById('searchBtn');
-
-            if (!name || !birth) { alert("🐰 姓名和生日都要填哦！"); return; }
-
-            // 施法动画
-            btn.disabled = true; btn.innerText = "🔮 正在施法...";
-            resultDiv.style.display = "none"; resultDiv.className = "result-area";
-
-            setTimeout(() => {
-                btn.disabled = false; btn.innerText = "✨ 查询 ✨";
-                
-                // 查找逻辑
-                const found = studentData.find(s => s.name === name && s.birth === birth);
-                
-                resultDiv.style.display = "block";
-                if (found) {
-                    nameDiv.innerHTML = "🎉 学员: " + found.name;
-                    scoreDiv.innerHTML = found.score;
-                    if (found.num >= 90) resultDiv.classList.add("rank-s");
-                    else if (found.num >= 80) resultDiv.classList.add("rank-a");
-                    else if (found.num >= 60) resultDiv.classList.add("rank-b");
-                    else resultDiv.classList.add("rank-c");
-                } else {
-                    resultDiv.style.background = "#f5f6fa";
-                    resultDiv.style.border = "2px dashed #dcdde1";
-                    nameDiv.innerHTML = "🍃 哎呀...";
-                    // 贴心提示
-                    scoreDiv.innerHTML = `找不到该信息<br>1. 请确认文件是 data.xlsx<br>2. 你的输入: ${name} / ${birth}`;
-                }
-            }, 600);
-        }
-    </script>
-</body>
-</html>
+        // --- 🟢 数据区 (已录入50位同学) ---
+        const rawData = [
+            ["曹天佑", "1211", 83.5, 94, 74.5],
+            ["曹晞宣", "0409", 84, 99, 95],
+            ["陈好", "0110", 74.5, 95, 92],
+            ["陈佳星", "0826", 86.5, 100, 77.5],
+            ["陈思耀", "0427", 79.5, 76.5, 87.3],
+            ["陈宇浩", "0623", 79.5, 88, 28],
+            ["陈梓仪", "0920", 4, 7, 21.5],
+            ["戴诗宸", "1124", 35.5, 17.5, 19.5],
+            ["邓楚和", "0630", 32, 29, 22],
+            ["邓恒", "0523", 84.3, 93.5, 98],
+            ["邓苏嵘", "0401", 78.8, 93.5, 52],
+            ["邓新乐", "1001", 13, 39.5, 19.5],
+            ["顾谭浩", "0225", 86.8, 90, 93.5],
+            ["官靖裕", "1009", 41, 78.5, 56.8],
+            ["何泉", "0725", 13, 62, 24],
+            ["何咏珊", "0311", 57, 75.5, 59],
+            ["胡浩鑫", "0407", 82.5, 97, 89.5],
+            ["胡文山", "0721", 67.5, 76, 56.5],
+            ["黄家和", "0630", 40.5, 20, 25.5],
+            ["黄靖诗", "0212", 90, 96, 99.5],
+            ["黄梦灵", "0108", 77.3, 95, 54.5],
+            ["黄胜", "0823", 18.5, 93, 23.5],
+            ["黄艳萍", "0204", 87, 80, 92.5],
+            ["黄政烨", "0824", 42, 74, 24.5],
+            ["黄子良", "0712", 79, 70, 76],
+            ["孔筠瑶", "1221", 60, 82.5, 87.5],
+            ["邝静怡", "0824", 87.8, 97, 97.5],
+            ["李安倪", "0811", 76.3, 97, 82],
+            ["李博文", "1024", 61.5, 62.5, 28.5],
+            ["李嘉豪", "0925", 20.5, 73.5, 26],
+            ["李嘉俊", "1103", 72, 85.5, 73.8],
+            ["李俊良", "0201", 57.5, 65.5, 39.5],
+            ["李圣
