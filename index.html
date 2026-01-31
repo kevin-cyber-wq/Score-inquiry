@@ -256,9 +256,9 @@
                         nameDiv.innerHTML = "🎉 " + targetStudent.n + " 同学";
                         scoreDiv.innerHTML = targetStudent.s;
                         if (targetStudent.t >= 270) { resultDiv.classList.add("rank-s"); triggerFireworks(); }
-                        else if (targetStudent.t >= 240) { resultDiv.classList.add("rank-a"); triggerStreamers(); }
+                        else if (targetStudent.t >= 240) { resultDiv.classList.add("rank-a"); triggerSakura(); }
                         else if (targetStudent.t >= 180) { resultDiv.classList.add("rank-b"); triggerStars(); }
-                        else { resultDiv.classList.add("rank-c"); triggerSakura(); }
+                        else { resultDiv.classList.add("rank-c"); triggerStreamers(); }
                     } else {
                         resultDiv.style.display = "block"; resultDiv.classList.add("not-found", "err-birth");
                         nameDiv.innerHTML = "🔒 验证失败";
