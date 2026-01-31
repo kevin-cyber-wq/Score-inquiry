@@ -2,139 +2,155 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>凯文的✨魔法成绩屋✨</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>凯文的✨ 魔法成绩屋 ✨</title>
     <style>
-        /* 魔法主题背景：柔和的粉紫色渐变 */
+        /* 这里是让界面变可爱的魔法 CSS */
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%);
+            background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%);
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            color: #4a148c;
+            font-family: "Microsoft YaHei", "Heiti SC", sans-serif;
+            margin: 0;
         }
 
-        /* 磨砂玻璃质感的容器 */
-        .container {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 400px;
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.3);
+            width: 320px;
+            border: 4px solid #fff;
         }
 
-        h1 { font-size: 1.5rem; margin-bottom: 1.5rem; }
-        .input-group { margin-bottom: 1rem; text-align: left; }
-        label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; font-weight: bold; }
-        
+        h1 {
+            color: #ff6b81;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        p.subtitle {
+            color: #a4b0be;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
         input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1bee7;
-            border-radius: 10px;
-            box-sizing: border-box;
-            font-size: 1rem;
+            width: 80%;
+            padding: 15px;
+            border: 2px solid #ffcccc;
+            border-radius: 50px;
             outline: none;
-            transition: border-color 0.3s;
+            font-size: 16px;
+            text-align: center;
+            color: #555;
+            transition: 0.3s;
         }
 
-        input:focus { border-color: #ba68c8; }
+        input:focus {
+            border-color: #ff6b81;
+            box-shadow: 0 0 8px rgba(255, 107, 129, 0.3);
+        }
 
         button {
-            width: 100%;
-            padding: 12px;
-            background: #ab47bc;
-            color: white;
+            background: linear-gradient(to right, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
             border: none;
-            border-radius: 10px;
-            font-size: 1rem;
+            padding: 12px 40px;
+            border-radius: 50px;
+            color: white;
             font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
-            margin-top: 1rem;
-            transition: transform 0.2s, background 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+            transition: transform 0.2s;
         }
 
-        button:active { transform: scale(0.98); background: #8e24aa; }
-
-        /* 查询结果样式 */
-        #result {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            border-radius: 10px;
-            display: none;
-            background: #f3e5f5;
-            border-left: 5px solid #ab47bc;
+        button:active {
+            transform: scale(0.95);
         }
 
-        /* 隐藏和显示逻辑控制 */
-        .hidden { display: none; }
+        .result-area {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #ffeaa7;
+            display: none; /* 默认隐藏 */
+        }
+
+        .student-name {
+            font-size: 20px;
+            color: #2f3542;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .scores {
+            background: #fff0f6;
+            padding: 15px;
+            border-radius: 15px;
+            color: #ff6b81;
+            line-height: 1.6;
+            font-size: 15px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="gate-keeper" class="container">
-        <h1>✨ 魔法屋口令 ✨</h1>
-        <p style="font-size: 0.8rem; color: #7b1fa2;">请输入班级口令进入</p>
-        <input type="password" id="access-code" placeholder="输入口令 (默认: 2026)">
-        <button onclick="checkAccess()">开启魔法</button>
-    </div>
+    <div class="card">
+        <h1>🐰 期末成绩查询</h1>
+        <p class="subtitle">请输入手机号召唤成绩单</p>
 
-    <div id="main-content" class="container hidden">
-        <h1>凯文的魔法成绩屋 🪄</h1>
         <div class="input-group">
-            <label>学生姓名</label>
-            <input type="text" id="student-name" placeholder="请输入姓名">
+            <input type="text" id="phoneInput" placeholder="在此输入手机号..." maxlength="11">
         </div>
-        <div class="input-group">
-            <label>手机尾号</label>
-            <input type="tel" id="student-phone" placeholder="请输入家长手机后四位">
+
+        <button onclick="checkGrade()">✨ 查询 ✨</button>
+
+        <div id="result" class="result-area">
+            <div id="nameDisplay" class="student-name"></div>
+            <div id="scoreDisplay" class="scores"></div>
         </div>
-        <button onclick="searchScore()">即刻查询</button>
-        
-        <div id="result"></div>
     </div>
 
     <script>
-        // 1. 设置入场口令（你可以随时修改这里）
-        const MASTER_CODE = "2026"; 
+        // --- ✏️ 这里是你要修改的数据 ---
+        // 格式: "手机号": { name: "名字", score: "成绩" }
+        const database = {
+            "13800138000": { name: "小樱 🌸", score: "语文: 98 | 数学: 95<br>英语: 100 | 魔法: SS" },
+            "123456": { name: "测试宝宝 👶", score: "吃饭: 100分 | 睡觉: 100分" },
+            "13999999999": { name: "鸣人 🍥", score: "忍术: 60 | 影分身: 100" },
+            "13666666666": { name: "哆啦A梦 🔔", score: "铜锣烧鉴赏: 100" },
+            "13377517603": { name: "肖凯文", score: "数学: 100" }
+            
+        };
 
-        // 2. 录入学生数据（以后你只需要改这里）
-        const scoreData = [
-            { name: "张小明", phone: "1234", score: "数学 95, 语文 88" },
-            { name: "李华", phone: "5678", score: "数学 100, 语文 92" }
-            // 以后在这里继续按格式添加数据...
-        ];
-
-        function checkAccess() {
-            const code = document.getElementById('access-code').value;
-            if(code === MASTER_CODE) {
-                document.getElementById('gate-keeper').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-            } else {
-                alert("口令不对哦，请问问凯文老师吧！");
-            }
-        }
-
-        function searchScore() {
-            const name = document.getElementById('student-name').value.trim();
-            const phone = document.getElementById('student-phone').value.trim();
+        function checkGrade() {
+            const phone = document.getElementById('phoneInput').value.trim();
             const resultDiv = document.getElementById('result');
+            const nameDiv = document.getElementById('nameDisplay');
+            const scoreDiv = document.getElementById('scoreDisplay');
 
-            const student = scoreData.find(s => s.name === name && s.phone === phone);
+            if (!phone) {
+                alert("🐷 还没有输入手机号哦！");
+                return;
+            }
 
-            resultDiv.style.display = "block";
-            if (student) {
-                resultDiv.innerHTML = `<strong>${student.name} 同学：</strong><br><br>${student.score}<br><p style="font-size:0.7rem; margin-top:10px; color:#9c27b0;">✨ 继续加油，你是最棒的！</p>`;
+            if (database[phone]) {
+                // 查到了
+                resultDiv.style.display = "block";
+                nameDiv.innerHTML = "🎉 学员: " + database[phone].name;
+                scoreDiv.innerHTML = database[phone].score;
             } else {
-                resultDiv.innerHTML = "❌ 未找到相关成绩，请核对姓名和手机号。";
+                // 没查到
+                resultDiv.style.display = "block";
+                nameDiv.innerHTML = "🚫 哎呀...";
+                scoreDiv.innerHTML = "找不到这个号码的成绩呢<br>请确认一下是不是输错啦？";
             }
         }
     </script>
