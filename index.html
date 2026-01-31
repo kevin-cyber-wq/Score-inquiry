@@ -2,154 +2,88 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ 魔法成绩屋 ✨</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>✨ 魔法成绩屋 Pro ✨</title>
     <style>
-        /* --- 样式区 --- */
-        body { background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; margin: 0; }
-        .card { background: rgba(255, 255, 255, 0.95); padding: 30px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; width: 320px; border: 4px solid #fff; }
-        h1 { color: #ff6b81; font-size: 24px; margin-bottom: 5px; }
+        /* --- 基础魔法 CSS (保持风格一致) --- */
+        body { 
+            background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); 
+            height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-family: "Microsoft YaHei", sans-serif; 
+            margin: 0; 
+            /* 防止手机点击出现蓝色背景 */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 30px; 
+            border-radius: 30px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); /* 阴影加深一点，更立体 */
+            text-align: center; 
+            width: 320px; 
+            border: 4px solid #fff; 
+            transition: all 0.3s;
+        }
+
+        h1 { color: #ff6b81; font-size: 24px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,107,129,0.2); }
         p.subtitle { color: #a4b0be; font-size: 14px; margin-bottom: 25px; }
-        .input-group { margin-bottom: 15px; }
-        input { width: 85%; padding: 12px; border: 2px solid #ffcccc; border-radius: 15px; outline: none; font-size: 16px; text-align: center; color: #555; background: #fffafa; }
-        input:focus { border-color: #ff6b81; background: #fff; }
-        button { width: 90%; margin-top: 10px; background: linear-gradient(to right, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); border: none; padding: 12px 0; border-radius: 50px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.2s; }
+        
+        .input-group { margin-bottom: 15px; position: relative; }
+        
+        input { 
+            width: 85%; 
+            padding: 12px; 
+            border: 2px solid #ffcccc; 
+            border-radius: 15px; 
+            outline: none; 
+            font-size: 16px; 
+            text-align: center; 
+            color: #555; 
+            background: #fffafa; 
+            transition: 0.3s; 
+        }
+
+        input:focus { 
+            border-color: #ff6b81; 
+            background: #fff; 
+            box-shadow: 0 0 10px rgba(255, 107, 129, 0.2); 
+            transform: scale(1.02); /* 聚焦时微微放大 */
+        }
+
+        /* 📳 错误震动动画 */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); border-color: #ff6b81; }
+            75% { transform: translateX(5px); border-color: #ff6b81; }
+            100% { transform: translateX(0); }
+        }
+        .input-error { animation: shake 0.3s ease-in-out; }
+
+        button { 
+            width: 90%; 
+            margin-top: 10px; 
+            background: linear-gradient(to right, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); 
+            border: none; 
+            padding: 12px 0; 
+            border-radius: 50px; 
+            color: white; 
+            font-weight: bold; 
+            font-size: 16px; 
+            cursor: pointer; 
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4); 
+            transition: all 0.2s; 
+            /* 禁止文字被选中 */
+            user-select: none;
+        }
+        
         button:active { transform: scale(0.95); }
-        button:disabled { background: #dcdde1; cursor: not-allowed; }
+        button:disabled { background: #dcdde1; cursor: not-allowed; box-shadow: none; }
+
         .result-area { margin-top: 25px; padding: 20px; border-radius: 15px; display: none; }
         .student-name { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #333; }
         .scores { line-height: 1.8; font-size: 16px; color: #555; }
-        .footer-credit { margin-top: 25px; font-size: 12px; color: #dfe6e9; letter-spacing: 1px; }
-
-        /* 动画样式 */
-        @keyframes jelly { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        .rank-s { background: #fff5e6; border: 2px solid #ffd700; animation: jelly 0.8s ease-out forwards; } .rank-s::after { content: " 🏆"; }
-        .rank-a { background: #e3f2fd; border: 2px solid #90caf9; animation: jelly 0.6s ease-out forwards; } .rank-a::after { content: " 🌟"; }
-        .rank-b { background: #f3e5f5; border: 2px solid #ce93d8; animation: jelly 0.6s ease-out forwards; } .rank-b::after { content: " 🙂"; }
-        .rank-c { background: #ffebee; border: 2px solid #ef9a9a; animation: jelly 0.6s ease-out forwards; } .rank-c::after { content: " 💪"; }
-    </style>
-</head>
-<body>
-    <div class="card">
-        <h1>🐰 期末成绩查询</h1>
-        <p class="subtitle">请输入姓名和生日召唤成绩单</p>
-        <div class="input-group"><input type="text" id="nameInput" placeholder="请输入姓名"></div>
-        <div class="input-group"><input type="tel" id="birthInput" placeholder="请输入4位生日 (如: 0101)" maxlength="4"></div>
-        <button id="searchBtn" onclick="checkGrade()">✨ 查询 ✨</button>
-        <div id="result" class="result-area">
-            <div id="nameDisplay" class="student-name"></div>
-            <div id="scoreDisplay" class="scores"></div>
-        </div>
-        <div class="footer-credit">Designed by 凯文老师 🪄</div>
-    </div>
-
-    <script>
-        // --- 🟢 数据区 (已录入50位同学) ---
-        const rawData = [
-            ["曹天佑", "1211", 83.5, 94, 74.5],
-            ["曹晞宣", "0409", 84, 99, 95],
-            ["陈好", "0110", 74.5, 95, 92],
-            ["陈佳星", "0826", 86.5, 100, 77.5],
-            ["陈思耀", "0427", 79.5, 76.5, 87.3],
-            ["陈宇浩", "0623", 79.5, 88, 28],
-            ["陈梓仪", "0920", 4, 7, 21.5],
-            ["戴诗宸", "1124", 35.5, 17.5, 19.5],
-            ["邓楚和", "0630", 32, 29, 22],
-            ["邓恒", "0523", 84.3, 93.5, 98],
-            ["邓苏嵘", "0401", 78.8, 93.5, 52],
-            ["邓新乐", "1001", 13, 39.5, 19.5],
-            ["顾谭浩", "0225", 86.8, 90, 93.5],
-            ["官靖裕", "1009", 41, 78.5, 56.8],
-            ["何泉", "0725", 13, 62, 24],
-            ["何咏珊", "0311", 57, 75.5, 59],
-            ["胡浩鑫", "0407", 82.5, 97, 89.5],
-            ["胡文山", "0721", 67.5, 76, 56.5],
-            ["黄家和", "0630", 40.5, 20, 25.5],
-            ["黄靖诗", "0212", 90, 96, 99.5],
-            ["黄梦灵", "0108", 77.3, 95, 54.5],
-            ["黄胜", "0823", 18.5, 93, 23.5],
-            ["黄艳萍", "0204", 87, 80, 92.5],
-            ["黄政烨", "0824", 42, 74, 24.5],
-            ["黄子良", "0712", 79, 70, 76],
-            ["孔筠瑶", "1221", 60, 82.5, 87.5],
-            ["邝静怡", "0824", 87.8, 97, 97.5],
-            ["李安倪", "0811", 76.3, 97, 82],
-            ["李博文", "1024", 61.5, 62.5, 28.5],
-            ["李嘉豪", "0925", 20.5, 73.5, 26],
-            ["李嘉俊", "1103", 72, 85.5, 73.8],
-            ["李俊良", "0201", 57.5, 65.5, 39.5],
-            ["李圣标", "0925", 80.5, 76.5, 55.5],
-            ["李思霖", "0906", 56.5, 66, 27],
-            ["李彦忻", "0310", 79.5, 96, 89],
-            ["廖盈潞", "0620", 80, 91, 92.5],
-            ["林博文", "0707", 26, 18, 20],
-            ["林嘉杰", "1228", 87.8, 87, 97],
-            ["林心怡", "0320", 60.5, 71.5, 35],
-            ["林振轩", "0226", 85.8, 99, 99.8],
-            ["凌静怡", "0629", 87.5, 95, 98.5],
-            ["刘辰宇", "0422", 84.3, 33.5, 47.3],
-            ["刘馥源", "0516", 62.5, 74, 34.5],
-            ["刘家权", "1204", 54, 65.5, 43],
-            ["刘能康", "0327", 42, 50, 28],
-            ["刘润东", "0823", 62.5, 48, 37],
-            ["刘晓宇", "1120", 72, 66, 53],
-            ["刘欣怡", "0716", 66.5, 83, 23.5],
-            ["刘妤裴", "0611", 84.5, 82.5, 92.3],
-            ["刘育铭", "0208", 15, 10, 20]
-        ];
-
-        // --- 程序逻辑区 ---
-        const studentData = rawData.map(row => {
-            // 自动修复生日
-            let birth = String(row[1]).trim();
-            if (birth.length === 3) birth = "0" + birth; // 补齐3位生日的0
-            
-            const yw = parseFloat(row[2]) || 0;
-            const sx = parseFloat(row[3]) || 0;
-            const yy = parseFloat(row[4]) || 0;
-            const avg = (yw + sx + yy) / 3;
-
-            return {
-                name: String(row[0]).trim(),
-                birth: birth,
-                score: `语文：${yw}<br>数学：${sx}<br>英语：${yy}`,
-                num: avg
-            };
-        });
-
-        function checkGrade() {
-            const name = document.getElementById('nameInput').value.trim();
-            const birth = document.getElementById('birthInput').value.trim();
-            const resultDiv = document.getElementById('result');
-            const nameDiv = document.getElementById('nameDisplay');
-            const scoreDiv = document.getElementById('scoreDisplay');
-            const btn = document.getElementById('searchBtn');
-
-            if (!name || !birth) { alert("🐰 姓名和生日都要填哦！"); return; }
-            
-            btn.disabled = true; btn.innerText = "🔮 正在施法...";
-            resultDiv.style.display = "none"; resultDiv.className = "result-area";
-
-            setTimeout(() => {
-                btn.disabled = false; btn.innerText = "✨ 查询 ✨";
-                const found = studentData.find(s => s.name === name && s.birth === birth);
-                resultDiv.style.display = "block";
-                
-                if (found) {
-                    nameDiv.innerHTML = "🎉 学员: " + found.name;
-                    scoreDiv.innerHTML = found.score;
-                    if (found.num >= 90) resultDiv.classList.add("rank-s");
-                    else if (found.num >= 80) resultDiv.classList.add("rank-a");
-                    else if (found.num >= 60) resultDiv.classList.add("rank-b");
-                    else resultDiv.classList.add("rank-c");
-                } else {
-                    resultDiv.style.background = "#f5f6fa";
-                    resultDiv.style.border = "2px dashed #dcdde1";
-                    nameDiv.innerHTML = "🍃 哎呀...";
-                    scoreDiv.innerHTML = `找不到该信息<br>输入: ${name} / ${birth}<br>请确认生日是4位数字`;
-                }
-            }, 500);
-        }
-    </script>
-</body>
-</html>
+        .footer-credit { margin-top: 2
