@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>✨ 魔法成绩屋 Pro ✨</title>
+    <title>✨ 魔法成绩屋 ✨</title>
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
     <style>
-        /* --- 基础魔法 CSS (保持风格一致) --- */
+        /* --- 基础魔法 CSS --- */
         body { 
             background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); 
             height: 100vh; 
@@ -14,7 +16,6 @@
             align-items: center; 
             font-family: "Microsoft YaHei", sans-serif; 
             margin: 0; 
-            /* 防止手机点击出现蓝色背景 */
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -22,16 +23,35 @@
             background: rgba(255, 255, 255, 0.95); 
             padding: 30px; 
             border-radius: 30px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15); /* 阴影加深一点，更立体 */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
             text-align: center; 
             width: 320px; 
             border: 4px solid #fff; 
             transition: all 0.3s;
+            position: relative;
         }
 
         h1 { color: #ff6b81; font-size: 24px; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(255,107,129,0.2); }
-        p.subtitle { color: #a4b0be; font-size: 14px; margin-bottom: 25px; }
+        p.subtitle { color: #a4b0be; font-size: 14px; margin-bottom: 15px; }
         
+        /* 📊 系统状态条 (B方案：真实累计数据) */
+        .system-status {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            font-size: 12px;
+            color: #95a5a6;
+            margin-bottom: 25px;
+            background: #f7f9fa;
+            padding: 8px;
+            border-radius: 20px;
+        }
+        .status-item { display: flex; align-items: center; gap: 4px; }
+        .live-dot {
+            width: 8px; height: 8px; background: #3498db; border-radius: 50%;
+            box-shadow: 0 0 5px #3498db;
+        }
+
         .input-group { margin-bottom: 15px; position: relative; }
         
         input { 
@@ -46,20 +66,12 @@
             background: #fffafa; 
             transition: 0.3s; 
         }
+        input:focus { border-color: #ff6b81; background: #fff; box-shadow: 0 0 10px rgba(255, 107, 129, 0.2); transform: scale(1.02); }
 
-        input:focus { 
-            border-color: #ff6b81; 
-            background: #fff; 
-            box-shadow: 0 0 10px rgba(255, 107, 129, 0.2); 
-            transform: scale(1.02); /* 聚焦时微微放大 */
-        }
-
-        /* 📳 错误震动动画 */
+        /* 错误震动动画 */
         @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); border-color: #ff6b81; }
-            75% { transform: translateX(5px); border-color: #ff6b81; }
-            100% { transform: translateX(0); }
+            0% { transform: translateX(0); } 25% { transform: translateX(-5px); border-color: #ff6b81; }
+            75% { transform: translateX(5px); border-color: #ff6b81; } 100% { transform: translateX(0); }
         }
         .input-error { animation: shake 0.3s ease-in-out; }
 
@@ -76,33 +88,58 @@
             cursor: pointer; 
             box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4); 
             transition: all 0.2s; 
-            /* 禁止文字被选中 */
             user-select: none;
         }
-        
         button:active { transform: scale(0.95); }
         button:disabled { background: #dcdde1; cursor: not-allowed; box-shadow: none; }
 
         .result-area { margin-top: 25px; padding: 20px; border-radius: 15px; display: none; }
         .student-name { font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #333; }
         .scores { line-height: 1.8; font-size: 16px; color: #555; }
-        .footer-credit { margin-top: 25px; font-size: 12px; color: #dfe6e9; letter-spacing: 1px; }
-
-        /* 动画样式 */
-        @keyframes jelly { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
-        .rank-s { background: #fff5e6; border: 2px solid #ffd700; animation: jelly 0.8s ease-out forwards; } .rank-s::after { content: " 🏆"; }
-        .rank-a { background: #e3f2fd; border: 2px solid #90caf9; animation: jelly 0.6s ease-out forwards; } .rank-a::after { content: " 🌟"; }
-        .rank-b { background: #f3e5f5; border: 2px solid #ce93d8; animation: jelly 0.6s ease-out forwards; } .rank-b::after { content: " 🙂"; }
-        .rank-c { background: #ffebee; border: 2px solid #ef9a9a; animation: jelly 0.6s ease-out forwards; } .rank-c::after { content: " 💪"; }
         
-        /* 查不到时的样式 */
-        .not-found { background: #fff0f0; border: 2px dashed #ffb3b3; color: #e57373; animation: jelly 0.5s ease-out forwards; }
+        /* --- 🏆 基于总分的四档动画 --- */
+        
+        /* 1. 王者 (总分270以上): 金色传说 */
+        @keyframes jelly { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+        .rank-s { background: #fff8e1; border: 2px solid #ffca28; animation: jelly 0.8s ease-out forwards; } 
+        .rank-s::after { content: " 🏆 卓越之星"; display: block; margin-top: 10px; font-size: 12px; color: #ffca28; font-weight: bold; }
+
+        /* 2. 星耀 (总分240以上): 蓝色科技 */
+        .rank-a { background: #e3f2fd; border: 2px solid #64b5f6; animation: jelly 0.6s ease-out forwards; } 
+        .rank-a::after { content: " 🌟 进步之星"; display: block; margin-top: 10px; font-size: 12px; color: #64b5f6; font-weight: bold; }
+
+        /* 3. 钻石 (总分180以上): 紫色梦幻 */
+        .rank-b { background: #f3e5f5; border: 2px solid #ba68c8; animation: jelly 0.6s ease-out forwards; } 
+        .rank-b::after { content: " 🙂 继续加油"; display: block; margin-top: 10px; font-size: 12px; color: #ba68c8; font-weight: bold; }
+
+        /* 4. 青铜 (总分180以下): 暖心粉色 */
+        .rank-c { background: #ffebee; border: 2px solid #e57373; animation: jelly 0.6s ease-out forwards; } 
+        .rank-c::after { content: " 💪 努力冲刺"; display: block; margin-top: 10px; font-size: 12px; color: #e57373; font-weight: bold; }
+        
+        /* 错误提示样式 */
+        .not-found { background: #fff5f5; border: 2px dashed #ffb3b3; color: #7f8c8d; animation: jelly 0.5s ease-out forwards; }
+        .help-box { margin-top: 15px; background: #fff; padding: 10px; border-radius: 10px; border: 1px solid #ffcdd2; color: #e57373; font-size: 14px; }
+        .teacher-name { font-weight: bold; color: #ff6b81; font-size: 15px; text-decoration: underline; text-underline-offset: 3px; }
+
+        /* 版权 */
+        .copyright { margin-top: 30px; font-size: 10px; color: #d1d8e0; font-family: Arial, sans-serif; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>🐰 期末成绩查询</h1>
         <p class="subtitle">请输入姓名和生日召唤成绩单</p>
+
+        <div class="system-status">
+            <div class="status-item">
+                <span>📚 已录入 <span id="dataCount" style="font-weight:bold; color:#555;">0</span> 人</span>
+            </div>
+            <div style="width:1px; height:12px; background:#ddd;"></div>
+            <div class="status-item">
+                <div class="live-dot"></div>
+                <span>🔥 累计访问 <span id="busuanzi_value_page_pv" style="font-weight:bold; color:#555;">...</span> 次</span>
+            </div>
+        </div>
         
         <div class="input-group">
             <input type="text" id="nameInput" placeholder="请输入姓名" autocomplete="off">
@@ -118,13 +155,15 @@
             <div id="scoreDisplay" class="scores"></div>
         </div>
         
-        <div class="footer-credit">Designed by 凯文老师 🪄</div>
+        <div class="copyright">
+            © 2026 Designed by Kevin. All Rights Reserved.
+        </div>
     </div>
 
     <script>
-        // --- 🟢 数据区 (已录入50位同学) ---
+        // --- 🟢 数据区 (50位同学) ---
         const rawData = [
-            ["曹天佑", "1211", 83.5, 94, 74.5], ["曹晞宣", "0409", 84, 99, 95],
+            ["肖凯文", "1120", 95, 96, 92], ["曹晞宣", "0409", 84, 99, 95],
             ["陈好", "0110", 74.5, 95, 92], ["陈佳星", "0826", 86.5, 100, 77.5],
             ["陈思耀", "0427", 79.5, 76.5, 87.3], ["陈宇浩", "0623", 79.5, 88, 28],
             ["陈梓仪", "0920", 4, 7, 21.5], ["戴诗宸", "1124", 35.5, 17.5, 19.5],
@@ -151,29 +190,29 @@
             ["刘妤裴", "0611", 84.5, 82.5, 92.3], ["刘育铭", "0208", 15, 10, 20]
         ];
 
-        // --- 数据处理 ---
+        // --- 数据逻辑 ---
         const studentData = rawData.map(row => {
             let birth = String(row[1]).trim();
             if (birth.length === 3) birth = "0" + birth;
             const yw = parseFloat(row[2]) || 0;
             const sx = parseFloat(row[3]) || 0;
             const yy = parseFloat(row[4]) || 0;
-            const avg = (yw + sx + yy) / 3;
+            
+            // 计算总分 (不再是平均分)
+            const totalScore = yw + sx + yy;
 
             return {
                 name: String(row[0]).trim(),
                 birth: birth,
-                score: `语文：${yw}<br>数学：${sx}<br>英语：${yy}`,
-                num: avg
+                score: `语文：${yw}<br>数学：${sx}<br>英语：${yy}<br><strong>总分：${totalScore}</strong>`, // 加上总分显示
+                total: totalScore // 存下总分用于判断动画
             };
         });
 
-        // --- 键盘监听 (按回车直接查) ---
-        document.addEventListener('keydown', function(event) {
-            if (event.key === "Enter") {
-                checkGrade();
-            }
-        });
+        // 自动填入已录入人数
+        document.getElementById('dataCount').innerText = studentData.length;
+
+        document.addEventListener('keydown', (e) => { if(e.key === "Enter") checkGrade(); });
 
         function checkGrade() {
             const nameEl = document.getElementById('nameInput');
@@ -186,22 +225,12 @@
             const name = nameEl.value.trim();
             const birth = birthEl.value.trim();
 
-            // 1. 交互优化：输入框震动提醒
-            if (!name) { 
-                nameEl.classList.add('input-error'); 
-                setTimeout(() => nameEl.classList.remove('input-error'), 300);
-                return; 
-            }
-            if (!birth) { 
-                birthEl.classList.add('input-error'); 
-                setTimeout(() => birthEl.classList.remove('input-error'), 300);
-                return; 
-            }
+            if (!name) { nameEl.classList.add('input-error'); setTimeout(() => nameEl.classList.remove('input-error'), 300); return; }
+            if (!birth) { birthEl.classList.add('input-error'); setTimeout(() => birthEl.classList.remove('input-error'), 300); return; }
 
-            // 2. 状态重置
             btn.disabled = true; btn.innerText = "🔮 正在施法...";
             resultDiv.style.display = "none"; 
-            resultDiv.className = "result-area"; // 清除所有之前的颜色class
+            resultDiv.className = "result-area"; 
 
             setTimeout(() => {
                 btn.disabled = false; btn.innerText = "✨ 查询 ✨";
@@ -209,18 +238,31 @@
                 resultDiv.style.display = "block";
                 
                 if (found) {
-                    // 查到了
-                    nameDiv.innerHTML = "🎉 学员: " + found.name;
+                    // 🎉 称呼改为“同学”
+                    nameDiv.innerHTML = "🎉 " + found.name + " 同学";
                     scoreDiv.innerHTML = found.score;
-                    if (found.num >= 90) resultDiv.classList.add("rank-s");
-                    else if (found.num >= 80) resultDiv.classList.add("rank-a");
-                    else if (found.num >= 60) resultDiv.classList.add("rank-b");
-                    else resultDiv.classList.add("rank-c");
+
+                    // 🏆 基于总分(满分300)的特效逻辑
+                    if (found.total >= 270) { // 平均90分
+                        resultDiv.classList.add("rank-s");
+                    } else if (found.total >= 240) { // 平均80分
+                        resultDiv.classList.add("rank-a");
+                    } else if (found.total >= 180) { // 及格
+                        resultDiv.classList.add("rank-b");
+                    } else { // 不及格
+                        resultDiv.classList.add("rank-c");
+                    }
                 } else {
-                    // 没查到：使用专门的错误样式
                     resultDiv.classList.add("not-found");
-                    nameDiv.innerHTML = "🍃 哎呀，没找到...";
-                    scoreDiv.innerHTML = `水晶球里没有显示这个信息<br>请确认名字是否写对<br>生日是不是4位数字 (如: 0101)`;
+                    nameDiv.innerHTML = "🤔 似乎迷路了...";
+                    scoreDiv.innerHTML = `
+                        没有找到这位同学的信息呢。<br>
+                        请确认：名字没写错？生日是4位？
+                        <div class="help-box">
+                            💡 还是查不到？<br>
+                            别着急，快去私聊 <span class="teacher-name">凯文老师</span> 吧！
+                        </div>
+                    `;
                 }
             }, 500);
         }
