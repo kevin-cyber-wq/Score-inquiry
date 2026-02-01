@@ -15,63 +15,30 @@
         /* --- 基础布局 --- */
         body { background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); height: 100vh; display: flex; justify-content: center; align-items: center; font-family: -apple-system, sans-serif; margin: 0; overflow: hidden; }
         
-        /* --- ✨ 顶部双行滚动栏 --- */
+        /* --- 滚动战报栏 --- */
         .ticker-container {
             position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-            width: 95%; max-width: 650px; height: 74px; /* 双行高度 */
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            z-index: 100;
-            overflow: hidden;
-            display: flex; flex-direction: column; justify-content: center; gap: 4px;
-            /* 渐变遮罩，让滚动消失得自然 */
+            width: 95%; max-width: 650px; height: 74px;
+            background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px);
+            border-radius: 20px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.5); z-index: 100;
+            overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 4px;
             mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
             -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            /* 初始隐藏，有数据时淡入 */
             opacity: 0; transition: opacity 0.5s;
         }
-
-        /* 当有内容时，通过JS添加这个类显示出来 */
         .ticker-active { opacity: 1; }
-
-        .ticker-row {
-            display: flex; gap: 16px; width: max-content;
-            padding-left: 100%; /* 初始位置 */
-        }
-
-        /* 上行：向左滚 */
+        .ticker-row { display: flex; gap: 16px; width: max-content; padding-left: 100%; }
         .row-top { animation: scroll-left 40s linear infinite; }
-        /* 下行：向右滚 */
         .row-bottom { animation: scroll-right 45s linear infinite; }
-
         .ticker-container:hover .ticker-row { animation-play-state: paused; }
-
         @keyframes scroll-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         @keyframes scroll-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
 
-        /* 🏷️ 战报胶囊样式 */
-        .t-pill {
-            display: flex; align-items: center; gap: 6px;
-            padding: 3px 10px 3px 4px;
-            border-radius: 30px;
-            background: #fff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-            font-size: 12px; font-weight: 600; color: #555;
-            white-space: nowrap;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+        /* 战报胶囊 */
+        .t-pill { display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 30px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); font-size: 12px; font-weight: 600; color: #555; white-space: nowrap; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-        
-        .emoji-box {
-            width: 24px; height: 24px; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 14px; color: #fff;
-        }
-
-        /* 档次配色 */
+        .emoji-box { width: 24px; height: 24px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 14px; color: #fff; }
         .s-tier .emoji-box { background: linear-gradient(135deg, #ffd700, #fdb931); box-shadow: 0 2px 4px rgba(255, 215, 0, 0.4); }
         .a-tier .emoji-box { background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
         .b-tier .emoji-box { background: linear-gradient(135deg, #8ec5fc, #e0c3fc); }
@@ -79,38 +46,67 @@
 
         /* --- 主卡片 --- */
         .card { background: rgba(255, 255, 255, 0.96); padding: 30px; border-radius: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; width: 320px; position: relative; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.6); margin-top: 60px; }
-        
         h1 { color: #ff6b81; font-size: 24px; margin-bottom: 5px; letter-spacing: 1px; }
         p.subtitle { color: #a4b0be; font-size: 13px; margin-bottom: 18px; }
-        
         .system-status { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10px; color: #8395a7; margin-bottom: 25px; background: #f8f9fa; padding: 7px 12px; border-radius: 50px; border: 1px solid #eeeff1; }
         .status-item { display: flex; align-items: center; gap: 4px; line-height: 1; }
         .data-num { font-weight: 600; color: #2f3542; }
         .live-dot { width: 6px; height: 6px; background-color: #2ecc71; border-radius: 50%; position: relative; top: 0.2px; box-shadow: 0 0 5px rgba(46, 204, 113, 0.6); animation: pulse 2.5s infinite; }
         @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.4; transform: scale(0.9); } }
-        
         .input-group { margin-bottom: 15px; }
         input { width: 85%; padding: 13px; border: 1.5px solid #f1f2f6; border-radius: 14px; outline: none; font-size: 16px; text-align: center; transition: all 0.3s; }
         input:focus { border-color: #ff9a9e; }
         button { width: 90%; margin-top: 10px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border: none; padding: 13px 0; border-radius: 50px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: transform 0.2s; }
         button:active { transform: scale(0.97); }
-        
-        /* 结果卡片 */
         .result-area { margin-top: 25px; padding: 20px; border-radius: 18px; display: none; line-height: 1.8; transition: all 0.5s; }
         .student-name { font-size: 19px; font-weight: bold; color: #2f3542; margin-bottom: 8px; }
-        
         .rank-s { background: linear-gradient(135deg, #fff9db 0%, #fff0b3 100%); border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); animation: jelly 0.6s forwards; }
         .rank-a { background: linear-gradient(135deg, #f3e7e9 0%, #e3eeff 99%, #e3eeff 100%); border: 2px solid #a18cd1; animation: jelly 0.6s forwards; }
         .rank-b { background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%); border: 2px solid #8ec5fc; color: #fff; animation: jelly 0.6s forwards; }
         .rank-c { background: #f8f9fa; border: 2px dashed #dee2e6; animation: jelly 0.6s forwards; }
         @keyframes jelly { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .copyright { margin-top: 30px; font-size: 11px; color: #ff6b81; font-weight: 600; opacity: 0.8; }
-
-        /* 通知气泡 */
-        #notification-container { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        #notification-container { position: fixed; bottom: 80px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
         .toast { background: rgba(255, 255, 255, 0.95); padding: 10px 18px; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-size: 12px; color: #555; border-left: 4px solid #2ecc71; display: flex; align-items: center; gap: 8px; animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), fadeOut 0.5s 3.5s forwards; backdrop-filter: blur(5px); }
         @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; transform: translateY(20px); } }
+
+        /* --- ✨ 新增：底部弹幕输入栏 --- */
+        .dm-bar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px;
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px);
+            padding: 8px 8px 8px 15px; border-radius: 50px;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.6);
+            z-index: 999; transition: transform 0.3s;
+        }
+        .dm-bar:focus-within { transform: translateX(-50%) scale(1.02); }
+        
+        .dm-input {
+            flex: 1; border: none; background: transparent; outline: none;
+            font-size: 14px; color: #555; text-align: left; padding: 0;
+            width: auto; /* 覆盖全局input样式 */
+        }
+        
+        .dm-btn {
+            width: auto; margin: 0; padding: 8px 20px; font-size: 13px;
+            background: #2ecc71; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4);
+            border-radius: 30px;
+        }
+        .dm-btn:active { transform: scale(0.95); }
+
+        /* --- ✨ 弹幕动画 --- */
+        .dm-item {
+            position: fixed; white-space: nowrap; 
+            font-weight: bold; font-size: 20px; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            pointer-events: none; z-index: 2000;
+            animation: fly linear forwards;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        @keyframes fly { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
@@ -124,7 +120,6 @@
     <div class="card">
         <h1>🐰 期末成绩查询</h1>
         <p class="subtitle">请输入姓名和生日召唤成绩单</p>
-
         <div class="system-status">
             <div class="status-item"><span>⬢ 数据库已同步 <span id="dataCount" class="data-num">0</span> 人</span></div>
             <div style="width:1px; height:10px; background:#e0e0e0;"></div>
@@ -132,25 +127,26 @@
             <div style="width:1px; height:10px; background:#e0e0e0;"></div>
             <div class="status-item"><div class="live-dot"></div><span>在线 <span id="onlineCount" class="data-num">1</span></span></div>
         </div>
-        
         <div class="input-group"><input type="text" id="nameInput" placeholder="输入姓名"></div>
         <div class="input-group"><input type="tel" id="birthInput" placeholder="4位生日 (如: 0101)" maxlength="4"></div>
-        
         <button id="searchBtn" onclick="checkGrade()">✨ 查询 ✨</button>
-        
         <div id="result" class="result-area">
             <div id="nameDisplay" class="student-name"></div>
             <div id="scoreDisplay"></div>
         </div>
-        
         <div class="copyright">&copy; 2026 Designed by Kevin</div>
+    </div>
+
+    <div class="dm-bar">
+        <input type="text" id="dmInput" class="dm-input" placeholder="发送弹幕..." maxlength="20" onkeypress="if(event.keyCode==13) sendDanmaku()">
+        <button class="dm-btn" onclick="sendDanmaku()">发送</button>
     </div>
 
     <script>
         // --- 1. 核心数据库 ---
         const rawData = [
             ["肖凯文", "1120", 93.5, 94, 94.5], ["陈凯文", "1120", 81, 79, 85], ["刘凯文", "1120", 61, 64, 64],
-            ["彭凯文", "1120", 20, 30, 47.5], ["陈思耀", "0427", 79.5, 76.5, 87.3], ["陈宇浩", "0623", 79.5, 88, 28],
+            ["彭凯文", "1120", 20, 30, 47.5], ["杨文操", "1208", 99.5, 96.5, 97.3], ["陈宇浩", "0623", 79.5, 88, 28],
             ["陈梓仪", "0920", 4, 7, 21.5], ["戴诗宸", "1124", 35.5, 17.5, 19.5], ["邓楚和", "0630", 32, 29, 22],
             ["邓恒", "0523", 84.3, 93.5, 98], ["邓苏嵘", "0401", 78.8, 93.5, 52], ["邓新乐", "1001", 13, 39.5, 19.5],
             ["顾谭浩", "0225", 86.8, 90, 93.5], ["官靖裕", "1009", 41, 78.5, 56.8], ["何泉", "0725", 13, 62, 24],
@@ -189,48 +185,72 @@
             }
         } catch (e) { console.error(e); }
 
-        // --- 3. 核心功能: 动态战报逻辑 ---
-        
-        // 🚫 核心：用于去重的 Set。重启页面后清空，重新接收广播。
+        // --- 3. 动态战报逻辑 ---
         const displayedNames = new Set();
-        let toggleRow = true; // 上下行交替开关
+        let toggleRow = true;
 
-        // 档次判定：返回CSS类和表情
         function getTierInfo(score) {
-            if (score >= 270) return { cls: 's-tier', icon: '👑' }; // S级
-            if (score >= 240) return { cls: 'a-tier', icon: '💎' }; // A级
-            if (score >= 210) return { cls: 'b-tier', icon: '🌟' }; // B级
-            return { cls: 'c-tier', icon: '🍀' }; // C级
+            if (score >= 270) return { cls: 's-tier', icon: '🥳' }; 
+            if (score >= 240) return { cls: 'a-tier', icon: '🥹' }; 
+            if (score >= 210) return { cls: 'b-tier', icon: '😱' }; 
+            return { cls: 'c-tier', icon: '😭' }; 
         }
 
-        // 添加到滚动栏
         function addToTicker(name, score) {
-            // 🛑 如果名字已经在墙上了，直接返回，不重复添加
             if (displayedNames.has(name)) return;
-            
-            // 标记为已展示
             displayedNames.add(name);
-            
-            // 显示滚动栏容器（初始是隐藏的）
             document.getElementById('tickerContainer').classList.add('ticker-active');
-
             const info = getTierInfo(score);
-            
-            // 创建胶囊元素
             const item = document.createElement('div');
             item.className = `t-pill ${info.cls}`;
             item.innerHTML = `<div class="emoji-box">${info.icon}</div> ${name} +${info.icon}`;
-            
-            // 交替插入上下两行
             const trackId = toggleRow ? 'trackTop' : 'trackBottom';
             document.getElementById(trackId).appendChild(item);
-            
             toggleRow = !toggleRow; 
         }
 
-        // ⚠️ 注意：已删除 initTickerData()。页面初始状态滚动栏为空。
+        // --- 4. ✨ 实时弹幕逻辑 (发送与发射) ---
+        
+        // 发送弹幕 (点击按钮)
+        async function sendDanmaku() {
+            const input = document.getElementById('dmInput');
+            const text = input.value.trim();
+            if (!text) return;
 
-        // --- 4. 实时逻辑 ---
+            // 广播给所有人 (包括自己)
+            if (globalChannel) {
+                await globalChannel.send({
+                    type: 'broadcast',
+                    event: 'danmaku', // ✨ 新事件类型
+                    payload: { text: text }
+                });
+                input.value = ''; // 清空输入框
+            }
+        }
+
+        // 发射弹幕 (在屏幕上飞)
+        function shootDanmaku(text) {
+            const el = document.createElement('div');
+            el.innerText = text;
+            el.className = 'dm-item';
+            
+            // 随机颜色
+            const colors = ['#fff', '#ffeaa7', '#81ecec', '#fab1a0', '#a29bfe'];
+            el.style.color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // 随机高度 (屏幕 10% - 70% 区域，避开底部输入栏)
+            el.style.top = Math.floor(Math.random() * 60 + 10) + '%';
+            
+            // 随机速度 (8s - 14s)
+            el.style.animationDuration = Math.floor(Math.random() * 6 + 8) + 's';
+            
+            document.body.appendChild(el);
+            
+            // 动画结束后移除
+            setTimeout(() => { el.remove(); }, 14000);
+        }
+
+        // --- 5. 实时连接主逻辑 ---
         async function initLiveCount() {
             if (!supabaseClient) return;
             let myId = localStorage.getItem('score_visitor_id') || ('user_' + Math.floor(Math.random() * 10000000));
@@ -247,9 +267,11 @@
                 .on('broadcast', { event: 'check_success' }, (payload) => {
                     const { name, score } = payload.payload;
                     showToast("🎉 " + name + " 已查询成绩");
-                    
-                    // ✨ 只有收到广播（说明有人查成功了）才上墙
                     if(score !== undefined) addToTicker(name, score);
+                })
+                // ✨ 监听弹幕事件
+                .on('broadcast', { event: 'danmaku' }, (payload) => {
+                    shootDanmaku(payload.payload.text);
                 })
                 .subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') await globalChannel.track({ online_at: new Date().toISOString() });
@@ -265,7 +287,7 @@
             setTimeout(() => { toast.remove(); }, 4000);
         }
 
-        // --- 5. 庆祝动画 ---
+        // --- 6. 动画与查询 ---
         function animRankS() {
             var duration = 3000; var end = Date.now() + duration;
             (function frame() {
@@ -281,7 +303,6 @@
             setTimeout(shoot, 0); setTimeout(shoot, 100); setTimeout(shoot, 200);
         }
 
-        // --- 6. 查询逻辑 ---
         async function checkGrade() {
             const name = document.getElementById('nameInput').value.trim();
             const birth = document.getElementById('birthInput').value.trim();
@@ -302,7 +323,6 @@
                     nameDiv.innerText = "🎉 " + student.n + " 同学";
                     scoreDiv.innerHTML = student.s;
 
-                    // ✨ 只有查到档案，才发送广播 -> 才会触发 addToTicker
                     if (globalChannel) {
                         globalChannel.send({ 
                             type: 'broadcast', 
@@ -317,7 +337,6 @@
                     else { resultDiv.classList.add("rank-c"); }
 
                 } else {
-                    // 查不到档案，不做任何广播操作
                     nameDiv.innerText = "🚫 未找到档案";
                     scoreDiv.innerHTML = "请检查姓名或生日是否输入正确。";
                     resultDiv.classList.add("rank-c");
