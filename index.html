@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <title>凯文老师de✨魔法成绩屋✨</title>
-    
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
     
     <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
@@ -13,235 +11,59 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     
     <style>
-        /* ==================== 
-           1. 全局布局与背景 
-           ==================== */
-        body { 
-            /* 背景色：经典的暖色到紫色的渐变 */
-            background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); 
-            height: 100vh; /* 占满屏幕高度 */
-            display: flex; /* Flex布局 */
-            justify-content: center; /* 水平居中 */
-            align-items: center; /* 垂直居中 */
-            font-family: -apple-system, sans-serif; /* 系统默认字体 */
-            margin: 0; 
-            overflow: hidden; /* 禁止页面滚动 */
-            -webkit-tap-highlight-color: transparent; /* 去除移动端点击高亮 */
-            position: relative;
-        }
-
-        /* 魔法尘埃背景层：增加氛围感的动态粒子背景 */
-        .magic-dust {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            /* 使用径向渐变模拟微小的圆点 */
-            background-image: radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px);
-            background-size: 50px 50px; /* 控制点的密度 */
-            opacity: 0.5; 
-            z-index: 1; 
-            pointer-events: none; /* 确保不阻挡鼠标点击 */
-            animation: twinkle 6s infinite linear; /* 闪烁移动动画 */
-        }
-        /* 背景粒子向上漂浮并闪烁的动画 */
-        @keyframes twinkle { 
-            0% { transform: translateY(0); opacity: 0.3; } 
-            50% { opacity: 0.7; } 
-            100% { transform: translateY(-30px); opacity: 0.3; } 
-        }
-
-        /* ==================== 
-           2. 顶部滚动战报栏 
-           ==================== */
-        .ticker-container {
-            position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
-            width: 94%; max-width: 650px; height: 80px;
-            /* 毛玻璃特效 */
-            background: rgba(255, 255, 255, 0.65); 
-            backdrop-filter: blur(12px);
-            border-radius: 20px; 
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.4); 
-            z-index: 100; /* 确保在最上层 */
-            overflow: hidden; /* 隐藏超出部分 */
-            display: flex; flex-direction: column; justify-content: space-evenly;
-            /* 左右两侧渐隐遮罩，让滚动看起来更自然 */
-            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-            opacity: 0; transition: opacity 0.5s; /* 初始隐藏，有数据时显示 */
-        }
+        /* ==================== 样式部分 (保持不变) ==================== */
+        body { background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); height: 100vh; display: flex; justify-content: center; align-items: center; font-family: -apple-system, sans-serif; margin: 0; overflow: hidden; -webkit-tap-highlight-color: transparent; position: relative; }
+        .magic-dust { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px); background-size: 50px 50px; opacity: 0.5; z-index: 1; pointer-events: none; animation: twinkle 6s infinite linear; }
+        @keyframes twinkle { 0% { transform: translateY(0); opacity: 0.3; } 50% { opacity: 0.7; } 100% { transform: translateY(-30px); opacity: 0.3; } }
+        .ticker-container { position: fixed; top: 15px; left: 50%; transform: translateX(-50%); width: 94%; max-width: 650px; height: 80px; background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); border-radius: 20px; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1); border: 1px solid rgba(255, 255, 255, 0.4); z-index: 100; overflow: hidden; display: flex; flex-direction: column; justify-content: space-evenly; mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); opacity: 0; transition: opacity 0.5s; }
         .ticker-active { opacity: 1; }
-        
-        /* 每一行滚动的容器 */
         .ticker-row { display: flex; gap: 16px; width: max-content; align-items: center; will-change: transform; height: 30px; }
-        
-        /* 顶部行向右滚，底部行向左滚 */
         .row-top { transform: translateX(-100%); animation: scrollLeftToRight 25s linear infinite; }
         .row-bottom { transform: translateX(100vw); animation: scrollRightToLeft 30s linear infinite; }
-        
-        /* 鼠标按住时暂停滚动 */
         .ticker-container:active .ticker-row { animation-play-state: paused; }
-
         @keyframes scrollLeftToRight { 0% { transform: translateX(-100%); } 100% { transform: translateX(100vw); } }
         @keyframes scrollRightToLeft { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
-
-        /* 战报小胶囊样式 */
-        .t-pill { 
-            display: flex; align-items: center; gap: 6px; 
-            padding: 3px 10px 3px 4px; border-radius: 30px; 
-            background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); 
-            font-size: 11px; font-weight: 600; color: #555; white-space: nowrap; 
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 弹出动画 */
-        }
+        .t-pill { display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; border-radius: 30px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.05); font-size: 11px; font-weight: 600; color: #555; white-space: nowrap; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn { 0% { transform: scale(0); } 100% { transform: scale(1); } }
-        
-        /* 胶囊左侧的 Emoji 圆圈 */
         .emoji-box { width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 13px; color: #fff; }
-        
-        /* 根据成绩等级显示不同颜色 */
-        .s-tier .emoji-box { background: linear-gradient(135deg, #ffd700, #fdb931); } /* 金色 */
-        .a-tier .emoji-box { background: linear-gradient(135deg, #10b981, #34d399); } /* 绿色 */
-        .b-tier .emoji-box { background: linear-gradient(135deg, #3b82f6, #60a5fa); } /* 蓝色 */
-        .c-tier .emoji-box { background: #9ca3af; } /* 灰色 */
-
-        /* ==================== 
-           3. 主卡片区域 
-           ==================== */
-        .card { 
-            background: rgba(255, 255, 255, 0.94); 
-            padding: 25px 30px 70px 30px; /* 底部 padding 较大，为了不让输入框挡住版权文字 */
-            border-radius: 28px; 
-            box-shadow: 0 15px 45px rgba(0,0,0,0.1); 
-            text-align: center; 
-            width: 320px; 
-            position: relative; 
-            z-index: 10; 
-            border: 1px solid rgba(255, 255, 255, 0.6); 
-            margin-top: 40px; /* 整体位置微调 */
-        }
+        .s-tier .emoji-box { background: linear-gradient(135deg, #ffd700, #fdb931); }
+        .a-tier .emoji-box { background: linear-gradient(135deg, #10b981, #34d399); }
+        .b-tier .emoji-box { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .c-tier .emoji-box { background: #9ca3af; }
+        .card { background: rgba(255, 255, 255, 0.94); padding: 25px 30px 70px 30px; border-radius: 28px; box-shadow: 0 15px 45px rgba(0,0,0,0.1); text-align: center; width: 320px; position: relative; z-index: 10; border: 1px solid rgba(255, 255, 255, 0.6); margin-top: 40px; }
         h1 { color: #ff6b81; font-size: 24px; margin-bottom: 5px; letter-spacing: 1px; }
         p.subtitle { color: #a4b0be; font-size: 13px; margin-bottom: 18px; }
-        
-        /* 状态信息栏 (数据库/访问量/在线) */
-        .system-status { 
-            display: flex; justify-content: center; align-items: center; 
-            gap: 8px; font-size: 10px; color: #8395a7; 
-            margin-bottom: 25px; background: #f8f9fa; 
-            padding: 7px 12px; border-radius: 50px; 
-            border: 1px solid #eeeff1; 
-        }
+        .system-status { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10px; color: #8395a7; margin-bottom: 25px; background: #f8f9fa; padding: 7px 12px; border-radius: 50px; border: 1px solid #eeeff1; }
         .status-item { display: flex; align-items: center; gap: 5px; line-height: 1; }
         .data-num { font-weight: 600; color: #2f3542; }
-        
-        /* 在线人数绿点呼吸动画 */
-        .live-dot { 
-            width: 6px; height: 6px; background-color: #2ecc71; border-radius: 50%; 
-            box-shadow: 0 0 5px rgba(46, 204, 113, 0.6); animation: pulse 2.5s infinite; 
-        }
-        @keyframes pulse { 
-            0% { opacity: 0.4; transform: scale(0.9); } 
-            50% { opacity: 1; transform: scale(1.1); } 
-            100% { opacity: 0.4; transform: scale(0.9); } 
-        }
-        
-        /* ==================== 
-           4. 输入框与按钮 
-           ==================== */
+        .live-dot { width: 6px; height: 6px; background-color: #2ecc71; border-radius: 50%; box-shadow: 0 0 5px rgba(46, 204, 113, 0.6); animation: pulse 2.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.4; transform: scale(0.9); } }
         .input-group { margin-bottom: 15px; }
-        
-        input { 
-            width: 85%; 
-            padding: 13px; 
-            border: 1.5px solid #f1f2f6; 
-            border-radius: 14px; 
-            outline: none; 
-            font-size: 16px; 
-            
-            /* --- 核心修复：确保文字和输入框完美居中 --- */
-            text-align: center;   /* 文字水平居中 */
-            display: block;       /* 块级元素 */
-            margin: 0 auto;       /* 输入框自身水平居中 */
-            line-height: normal;  /* 修复 iOS 上光标错位 */
-            
-            transition: all 0.3s; 
-            -webkit-appearance: none; /* 去除原生样式 */
-        }
-        input:focus { border-color: #ff9a9e; } /* 聚焦变色 */
-        
-        /* 错误时的抖动动画类 */
+        input { width: 85%; padding: 13px; border: 1.5px solid #f1f2f6; border-radius: 14px; outline: none; font-size: 16px; text-align: center; display: block; margin: 0 auto; line-height: normal; transition: all 0.3s; -webkit-appearance: none; }
+        input:focus { border-color: #ff9a9e; }
         .shake { animation: shake 0.4s ease-in-out; border-color: #ff6b81 !important; box-shadow: 0 0 8px rgba(255, 107, 129, 0.3); }
-        @keyframes shake { 
-            0% { transform: translateX(0); } 
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 
-            20%, 40%, 60%, 80% { transform: translateX(5px); } 
-        }
-
-        button { 
-            width: 90%; margin-top: 10px; 
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); 
-            border: none; padding: 13px 0; border-radius: 50px; 
-            color: white; font-weight: bold; font-size: 16px; 
-            cursor: pointer; transition: transform 0.2s; -webkit-appearance: none; 
-        }
-        button:active { transform: scale(0.97); } /* 点击缩放 */
-        
-        /* ==================== 
-           5. 查询结果区域 
-           ==================== */
+        @keyframes shake { 0% { transform: translateX(0); } 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); } 20%, 40%, 60%, 80% { transform: translateX(5px); } }
+        button { width: 90%; margin-top: 10px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border: none; padding: 13px 0; border-radius: 50px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: transform 0.2s; -webkit-appearance: none; }
+        button:active { transform: scale(0.97); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         .result-area { margin-top: 25px; padding: 20px; border-radius: 18px; display: none; line-height: 1.8; transition: all 0.5s; }
         .student-name { font-size: 19px; font-weight: bold; color: #2f3542; margin-bottom: 8px; }
         .honor-title { font-size: 14px; font-weight: bold; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; gap: 5px; }
-
-        /* 不同等级的成绩单样式 (果冻弹跳出现动画 jelly) */
         .rank-s { background: linear-gradient(135deg, #fffcf2 0%, #fff7d1 100%); border: 2px solid #ffd700; color: #854d0e; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); animation: jelly 0.6s forwards; }
         .rank-a { background: linear-gradient(135deg, #f0fff4 0%, #d1fae5 100%); border: 2px solid #10b981; color: #065f46; animation: jelly 0.6s forwards; }
         .rank-b { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid #3b82f6; color: #1e40af; animation: jelly 0.6s forwards; }
         .rank-c { background: #f9fafb; border: 2px dashed #9ca3af; color: #4b5563; animation: jelly 0.6s forwards; }
         @keyframes jelly { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        
-        /* 底部版权信息 */
-        .copyright { 
-            position: absolute; bottom: 25px; left: 0; width: 100%;
-            font-size: 11px; color: #ff6b81; font-weight: 600; opacity: 0.8; 
-        }
-        
-        /* ==================== 
-           6. 通知与弹幕系统 
-           ==================== */
-        /* 右下角通知容器 */
+        .copyright { position: absolute; bottom: 25px; left: 0; width: 100%; font-size: 11px; color: #ff6b81; font-weight: 600; opacity: 0.8; }
         #notification-container { position: fixed; bottom: 85px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        /* 具体的通知条样式 (滑入 -> 停留 -> 上浮消失) */
-        .toast { 
-            background: rgba(255, 255, 255, 0.95); padding: 10px 18px; border-radius: 50px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-size: 12px; color: #555; 
-            border-left: 4px solid #2ecc71; display: flex; align-items: center; gap: 8px; 
-            animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), fadeOut 0.5s 3.5s forwards; 
-            backdrop-filter: blur(5px); 
-        }
+        .toast { background: rgba(255, 255, 255, 0.95); padding: 10px 18px; border-radius: 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-size: 12px; color: #555; border-left: 4px solid #2ecc71; display: flex; align-items: center; gap: 8px; animation: slideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), fadeOut 0.5s 3.5s forwards; backdrop-filter: blur(5px); }
         @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; transform: translateY(20px); } }
-
-        /* 底部固定弹幕输入栏 */
-        .dm-bar { 
-            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); 
-            width: 88%; max-width: 350px; 
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); 
-            padding: 8px 8px 8px 15px; border-radius: 50px; 
-            display: flex; align-items: center; gap: 10px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.6); 
-            z-index: 999; transition: transform 0.3s; 
-        }
-        /* 键盘弹起时稍微上移，防止被遮挡（部分浏览器有效） */
+        .dm-bar { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 88%; max-width: 350px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 8px 8px 8px 15px; border-radius: 50px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.6); z-index: 999; transition: transform 0.3s; }
         .dm-bar:focus-within { transform: translateX(-50%) translateY(-5px); }
         .dm-input { flex: 1; border: none; background: transparent; outline: none; font-size: 15px; color: #555; text-align: left; padding: 0; width: auto; }
         .dm-btn { width: auto; margin: 0; padding: 8px 18px; font-size: 13px; background: #2ecc71; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4); border-radius: 30px; }
-        
-        /* 飘过的弹幕样式 */
-        .dm-item { 
-            position: fixed; white-space: nowrap; font-weight: bold; font-size: 18px; 
-            text-shadow: 1.5px 1.5px 3px rgba(0,0,0,0.3); pointer-events: none; 
-            z-index: 2000; left: 0; 
-            animation: fly linear forwards; /* 匀速飞过 */
-            font-family: "YouYuan", "幼圆", "Mini", "Comic Sans MS", sans-serif; 
-        }
+        .dm-item { position: fixed; white-space: nowrap; font-weight: bold; font-size: 18px; text-shadow: 1.5px 1.5px 3px rgba(0,0,0,0.3); pointer-events: none; z-index: 2000; left: 0; animation: fly linear forwards; font-family: "YouYuan", "幼圆", sans-serif; }
         @keyframes fly { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
     </style>
 </head>
@@ -260,7 +82,7 @@
         <p class="subtitle">请输入姓名和生日召唤成绩单</p>
         
         <div class="system-status">
-            <div class="status-item"><span>⬢ 数据库已同步 <span id="dataCount" class="data-num">0</span> 人</span></div>
+            <div class="status-item"><span>⬢ 数据库状态 <span id="dbStatus" style="color:#2ecc71">正常</span></span></div>
             <div style="width:1px; height:10px; background:#e0e0e0;"></div>
             <div class="status-item"><span>访问 <span id="busuanzi_value_page_pv" class="data-num">...</span></span></div>
             <div style="width:1px; height:10px; background:#e0e0e0;"></div>
@@ -291,52 +113,7 @@
 
     <script>
         // ==========================================
-        // 1. 本地数据库 (包含姓名、生日密码、各科成绩)
-        // 格式：[姓名, 生日, 语文, 数学, 英语]
-        // ==========================================
-        const rawData = [
-            ["肖凯文", "1120", 93.5, 94, 94.5], ["陈凯文", "1120", 81, 79, 85], ["刘凯文", "1120", 71, 74, 74],
-            ["彭凯文", "1120", 20, 30, 47.5], ["杨文操", "1208", 99.5, 96.5, 97.3], ["陈宇浩", "0623", 79.5, 88, 28],
-            ["陈梓仪", "0920", 4, 7, 21.5], ["戴诗宸", "1124", 35.5, 17.5, 19.5], ["邓楚和", "0630", 32, 29, 22],
-            ["邓恒", "0523", 84.3, 93.5, 98], ["邓苏嵘", "0401", 78.8, 93.5, 52], ["邓新乐", "1001", 13, 39.5, 19.5],
-            ["顾谭浩", "0225", 86.8, 90, 93.5], ["官靖裕", "1009", 41, 78.5, 56.8], ["何泉", "0725", 13, 62, 24],
-            ["何咏珊", "0311", 57, 75.5, 59], ["胡浩鑫", "0407", 82.5, 97, 89.5], ["胡文山", "0721", 67.5, 76, 56.5],
-            ["黄家和", "0630", 40.5, 20, 25.5], ["黄靖诗", "0212", 90, 96, 99.5], ["黄梦灵", "0108", 77.3, 95, 54.5],
-            ["黄胜", "0823", 18.5, 93, 23.5], ["黄艳萍", "0204", 87, 80, 92.5], ["黄政烨", "0824", 42, 74, 24.5],
-            ["黄子良", "0712", 79, 70, 76], ["孔筠瑶", "1221", 60, 82.5, 87.5], ["邝静怡", "0824", 87.8, 97, 97.5],
-            ["李安倪", "0811", 76.3, 97, 82], ["李博文", "1024", 61.5, 62.5, 28.5], ["李嘉豪", "0925", 20.5, 73.5, 26],
-            ["李嘉俊", "1103", 72, 85.5, 73.8], ["李俊良", "0201", 57.5, 65.5, 39.5], ["李圣标", "0925", 80.5, 76.5, 55.5],
-            ["李思霖", "0906", 56.5, 66, 27], ["李彦忻", "0310", 79.5, 96, 89], ["廖盈潞", "0620", 80, 91, 92.5],
-            ["林博文", "0707", 26, 18, 20], ["林嘉杰", "1228", 87.8, 87, 97], ["林心怡", "0320", 60.5, 71.5, 35],
-            ["林振轩", "0226", 85.8, 99, 99.8], ["凌静怡", "0629", 87.5, 95, 98.5], ["刘辰宇", "0422", 84.3, 33.5, 47.3],
-            ["刘馥源", "0516", 62.5, 74, 34.5], ["刘家权", "1204", 54, 65.5, 43], ["刘能康", "0327", 42, 50, 28],
-            ["刘润东", "0823", 62.5, 48, 37], ["刘晓宇", "1120", 72, 66, 53], ["刘欣怡", "0716", 66.5, 83, 23.5],
-            ["刘妤裴", "0611", 84.5, 82.5, 92.3], ["刘育铭", "0208", 15, 10, 20]
-        ];
-
-        // 初始化处理数据
-        const db = rawData.map(row => {
-            // 确保生日是4位数（例如 112 -> 0112，虽然目前数据看起来都是对的，但加个防护）
-            let b = String(row[1]).trim(); 
-            if (b.length === 3) b = "0" + b;
-            
-            // 计算总分
-            const t = parseFloat(row[2]) + parseFloat(row[3]) + parseFloat(row[4]);
-            
-            // 返回结构化对象：n=姓名, b=生日, s=格式化后的成绩HTML, t=总分
-            return { 
-                n: row[0], 
-                b: b, 
-                s: `语文：${row[2]}<br>数学：${row[3]}<br>英语：${row[4]}<br><strong>总分：${t.toFixed(1)}</strong>`, 
-                t: t 
-            };
-        });
-
-        // 页面加载时显示总人数
-        document.getElementById('dataCount').innerText = db.length;
-
-        // ==========================================
-        // 2. Supabase 实时后端配置
+        // 1. Supabase 配置 (请确认 Key 正确)
         // ==========================================
         const supabaseUrl = 'https://ijyctklfafrnerowwgii.supabase.co'; 
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqeWN0a2xmYWZybmVyb3d3Z2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTc4NjEsImV4cCI6MjA4NTQ3Mzg2MX0._hYKSgibEQyhmyexM9V3R2Z5A0GesRBRSCwX3Ed77C8'; 
@@ -351,252 +128,238 @@
         } catch (e) { console.error(e); }
 
         // ==========================================
-        // 3. 动态战报 (顶部滚动条) 逻辑
+        // 2. 核心功能逻辑
         // ==========================================
-        const displayedNames = new Set(); // 记录已显示的姓名，防止重复
-        let toggleRow = true; // 用于交替将战报添加到上行或下行
+        
+        // 页面加载入口
+        window.onload = function() {
+            initLiveCount(); // 启动在线人数
+            loadHistory();   // 加载历史战报
+        };
 
-        // 根据分数判断等级，返回对应的 CSS 类和 Emoji
+        // --- 功能A: 加载历史战报 (从 query_logs 表) ---
+        async function loadHistory() {
+            if (!supabaseClient) return;
+
+            // 获取最近50条记录
+            const { data, error } = await supabaseClient
+                .from('query_logs')
+                .select('student_name, score') // 同时获取名字和分数
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (error) { console.error('加载历史失败:', error); return; }
+
+            if (data && data.length > 0) {
+                document.getElementById('tickerContainer').classList.add('ticker-active');
+                data.reverse().forEach(row => {
+                    addToTicker(row.student_name, row.score);
+                });
+            }
+        }
+
+        // --- 功能B: 记录本次查询 (写入 query_logs 表) ---
+        async function logQuery(name, score) {
+            if (!supabaseClient) return;
+            // 写入名字和总分，这样滚动栏就能显示颜色了
+            await supabaseClient.from('query_logs').insert({ 
+                student_name: name,
+                score: score
+            });
+        }
+
+        // --- 功能C: 查分主函数 (从 student_scores 表) ---
+        async function checkGrade() {
+            const nameInput = document.getElementById('nameInput');
+            const birthInput = document.getElementById('birthInput');
+            const resultDiv = document.getElementById('result');
+            const searchBtn = document.getElementById('searchBtn');
+
+            const name = nameInput.value.trim();
+            const birth = birthInput.value.trim();
+            
+            // 重置界面
+            resultDiv.style.display = "none";
+            document.getElementById('honorDisplay').innerHTML = "";
+            
+            // 简单校验
+            if (!name) { nameInput.classList.add('shake'); setTimeout(() => nameInput.classList.remove('shake'), 400); return; }
+            if (!birth) { birthInput.classList.add('shake'); setTimeout(() => birthInput.classList.remove('shake'), 400); return; }
+
+            searchBtn.disabled = true;
+            searchBtn.innerText = "🔍 查询中...";
+
+            // ====== 核心：去 Supabase 查分 ======
+            // 假设你的表名是 student_scores，字段是 name 和 birthday
+            const { data, error } = await supabaseClient
+                .from('student_scores') 
+                .select('*')
+                .eq('name', name)
+                .eq('birthday', birth)
+                .maybeSingle(); // 只取一条数据
+
+            searchBtn.disabled = false;
+            searchBtn.innerText = "✨ 查询 ✨";
+            resultDiv.style.display = "block";
+
+            if (error) {
+                showError("数据库连接失败，请稍后再试");
+                console.error(error);
+                return;
+            }
+
+            if (data) {
+                // --- 查到了！---
+                const score = parseFloat(data.total); // 总分
+                
+                // 1. 显示成绩单
+                document.getElementById('nameDisplay').innerText = "🎉 " + data.name + " 同学";
+                document.getElementById('scoreDisplay').innerHTML = 
+                    `语文：${data.chinese}<br>数学：${data.math}<br>英语：${data.english}<br><strong>总分：${score}</strong>`;
+                
+                // 2. 播放特效 & 显示称号
+                playEffectByScore(score);
+
+                // 3. 记录到数据库 (用于滚动战报)
+                logQuery(data.name, score);
+
+                // 4. 实时广播 (告诉在线的其他人)
+                if (globalChannel) {
+                    globalChannel.send({ 
+                        type: 'broadcast', event: 'check_success', 
+                        payload: { name: data.name, score: score } 
+                    });
+                    globalChannel.track({
+                        online_at: new Date().toISOString(),
+                        latest_check: { name: data.name, score: score }
+                    });
+                }
+                
+                // 查到后锁定按钮防止重复提交
+                searchBtn.disabled = true;
+
+            } else {
+                // --- 没查到 (可能是名字错，也可能是生日错) ---
+                // 为了安全，不提示具体是名字错还是生日错
+                document.getElementById('nameDisplay').innerText = "🤔 查询失败";
+                document.getElementById('scoreDisplay').innerHTML = "未找到匹配的记录。<br>请核对姓名与4位生日(如0101)。";
+                resultDiv.className = "result-area rank-c"; // 灰色边框
+            }
+        }
+
+        // ==========================================
+        // 3. 辅助功能 (动画、弹幕、滚动条)
+        // ==========================================
+
+        let displayedNames = new Set();
+        let toggleRow = true;
+
+        // 根据分数决定等级样式
         function getTierInfo(score) {
+            // 如果历史记录没存分数(旧数据)，或者分数为空，显示绿色勾勾
+            if (score === undefined || score === null) {
+                return { cls: 'a-tier', icon: '✅' };
+            }
+            // 正常逻辑
             if (score >= 270) return { cls: 's-tier', icon: '🥳' }; 
             if (score >= 240) return { cls: 'a-tier', icon: '😊' }; 
             if (score >= 210) return { cls: 'b-tier', icon: '😱' }; 
             return { cls: 'c-tier', icon: '😭' }; 
         }
 
-        // 添加一条记录到滚动栏
         function addToTicker(name, score) {
-            if (displayedNames.has(name)) return; // 如果已显示过，则忽略
-            displayedNames.add(name);
-            
-            // 只要有数据，就显示滚动栏容器
+            // 允许重复显示(如果是不同时间的查询)，或者你可以保留 Set 逻辑去重
+            // 这里为了让战报看起来热闹，暂时去掉了 Set 限制，或者你可以加上
+            // if (displayedNames.has(name)) return; 
+            // displayedNames.add(name);
+
             document.getElementById('tickerContainer').classList.add('ticker-active');
-            
             const info = getTierInfo(score);
             const item = document.createElement('div');
-            item.className = `t-pill ${info.cls}`; // 应用等级样式
+            item.className = `t-pill ${info.cls}`;
             item.innerHTML = `<div class="emoji-box">${info.icon}</div> ${name} 已查询`;
             
-            // 交替添加到上下轨道
             const trackId = toggleRow ? 'trackTop' : 'trackBottom';
             document.getElementById(trackId).appendChild(item);
             toggleRow = !toggleRow; 
         }
 
-        // ==========================================
-        // 4. 实时弹幕逻辑
-        // ==========================================
+        function playEffectByScore(score) {
+            const rDiv = document.getElementById('result');
+            const hDiv = document.getElementById('honorDisplay');
+            rDiv.className = "result-area"; // 重置类名
+
+            if (score >= 270) { 
+                rDiv.classList.add("rank-s"); hDiv.innerHTML = '<div class="honor-title" style="color:#854d0e">👑 荣誉时刻</div>';
+                animRankS(); 
+            } else if (score >= 240) { 
+                rDiv.classList.add("rank-a"); hDiv.innerHTML = '<div class="honor-title" style="color:#065f46">🌿 卓越成长</div>';
+                animRankA(); 
+            } else if (score >= 210) { 
+                rDiv.classList.add("rank-b"); hDiv.innerHTML = '<div class="honor-title" style="color:#1e40af">✨ 未来可期</div>';
+                animRankB(); 
+            } else { 
+                rDiv.classList.add("rank-c"); hDiv.innerHTML = '<div class="honor-title" style="color:#4b5563">🌱 厚积薄发</div>';
+                animRankC(); 
+            }
+        }
+
+        function showError(msg) {
+            const rDiv = document.getElementById('result');
+            rDiv.style.display = "block";
+            document.getElementById('nameDisplay').innerText = "⚠️ 错误";
+            document.getElementById('scoreDisplay').innerHTML = msg;
+            rDiv.className = "result-area rank-c";
+        }
+
+        // 动画函数集
+        function animRankS() { var end = Date.now() + 3000; (function frame() { confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffd700', '#ff0000'] }); confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffd700', '#ff0000'] }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
+        function animRankA() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#34d399', '#065f46'] }); }
+        function animRankB() { var defaults = { spread: 360, ticks: 50, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['star'], colors: ['#3b82f6', '#60a5fa', '#93c5fd'] }; function shoot() { confetti({ ...defaults, particleCount: 40, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 10, scalar: 0.75, shapes: ['circle'] }); } setTimeout(shoot, 0); setTimeout(shoot, 100); setTimeout(shoot, 200); }
+        function animRankC() { var end = Date.now() + 2000; (function frame() { confetti({ particleCount: 2, angle: 270, spread: 0, origin: { x: Math.random(), y: 0 }, colors: ['#9ca3af'], shapes: ['square'], gravity: 2, scalar: 0.8 }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
+
+        // 实时 & 弹幕初始化
+        async function initLiveCount() {
+            if (!supabaseClient) return;
+            let myId = localStorage.getItem('score_visitor_id') || ('user_' + Math.floor(Math.random() * 10000000));
+            localStorage.setItem('score_visitor_id', myId);
+            globalChannel = supabaseClient.channel('score_room', { config: { presence: { key: myId }, broadcast: { self: true } } });
+            globalChannel
+                .on('presence', { event: 'sync' }, () => {
+                    const state = globalChannel.presenceState();
+                    document.getElementById('onlineCount').innerText = Object.keys(state).length;
+                    Object.values(state).forEach(users => { users.forEach(u => { if (u.latest_check) addToTicker(u.latest_check.name, u.latest_check.score); }); });
+                })
+                .on('broadcast', { event: 'check_success' }, (payload) => {
+                    const { name, score } = payload.payload;
+                    showToast("🎉 " + name + " 已查询成绩");
+                    addToTicker(name, score);
+                })
+                .on('broadcast', { event: 'danmaku' }, (payload) => { shootDanmaku(payload.payload.text); })
+                .subscribe(async (status) => { if (status === 'SUBSCRIBED') await globalChannel.track({ online_at: new Date().toISOString() }); });
+        }
         
-        // 用户点击发送按钮触发
+        // 弹幕相关
         async function sendDanmaku() {
             const input = document.getElementById('dmInput');
             const text = input.value.trim();
             if (!text) return;
-            // 通过 Supabase 广播消息给所有在线用户
-            if (globalChannel) {
-                await globalChannel.send({ type: 'broadcast', event: 'danmaku', payload: { text: text } });
-                input.value = ''; // 清空输入框
-            }
+            if (globalChannel) { await globalChannel.send({ type: 'broadcast', event: 'danmaku', payload: { text: text } }); input.value = ''; }
         }
-
-        // 在屏幕上生成并移动弹幕 DOM 元素
         function shootDanmaku(text) {
-            const el = document.createElement('div');
-            el.innerText = text;
-            el.className = 'dm-item'; // 使用 CSS 定义好的动画类
-            
-            // 随机颜色
-            const colors = ['#fff', '#ffeaa7', '#81ecec', '#fab1a0', '#a29bfe'];
-            el.style.color = colors[Math.floor(Math.random() * colors.length)];
-            
-            // 随机高度 (30% - 70% 屏幕位置)
+            const el = document.createElement('div'); el.innerText = text; el.className = 'dm-item';
+            el.style.color = ['#fff', '#ffeaa7', '#81ecec', '#fab1a0', '#a29bfe'][Math.floor(Math.random() * 5)];
             el.style.top = Math.floor(Math.random() * 40 + 30) + '%';
-            
-            // 随机飞行速度
             el.style.animationDuration = Math.floor(Math.random() * 6 + 8) + 's';
-            
             document.body.appendChild(el);
-            
-            // 动画结束后移除元素，防止内存泄漏
             el.addEventListener('animationend', () => { el.remove(); });
         }
-
-        // ==========================================
-        // 5. 初始化连接 & 状态同步 (核心联网功能)
-        // ==========================================
-        async function initLiveCount() {
-            if (!supabaseClient) return;
-            
-            // 生成或读取用户 ID (用于统计在线人数)
-            let myId = localStorage.getItem('score_visitor_id') || ('user_' + Math.floor(Math.random() * 10000000));
-            localStorage.setItem('score_visitor_id', myId);
-
-            // 创建频道 'score_room'
-            globalChannel = supabaseClient.channel('score_room', {
-                config: { presence: { key: myId }, broadcast: { self: true } }
-            });
-
-            globalChannel
-                // 监听在线状态变化
-                .on('presence', { event: 'sync' }, () => {
-                    const state = globalChannel.presenceState();
-                    // 更新在线人数
-                    document.getElementById('onlineCount').innerText = Object.keys(state).length;
-                    
-                    // 同步新加入用户的“最新查询状态”到滚动栏
-                    Object.values(state).forEach(users => {
-                        users.forEach(u => {
-                            if (u.latest_check) {
-                                addToTicker(u.latest_check.name, u.latest_check.score);
-                            }
-                        });
-                    });
-                })
-                // 监听广播：有人查分成功
-                .on('broadcast', { event: 'check_success' }, (payload) => {
-                    const { name, score } = payload.payload;
-                    showToast("🎉 " + name + " 已查询成绩"); // 右下角弹窗通知
-                    if(score !== undefined) addToTicker(name, score); // 添加到滚动栏
-                })
-                // 监听广播：有人发弹幕
-                .on('broadcast', { event: 'danmaku' }, (payload) => {
-                    shootDanmaku(payload.payload.text);
-                })
-                // 订阅频道并追踪自己的在线状态
-                .subscribe(async (status) => {
-                    if (status === 'SUBSCRIBED') await globalChannel.track({ online_at: new Date().toISOString() });
-                });
-        }
-
-        // 显示右下角 Toast 通知
         function showToast(text) {
             const container = document.getElementById('notification-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `<span>🔔</span> ${text}`;
-            container.appendChild(toast);
-            // 1.2秒后自动消失
+            const toast = document.createElement('div'); toast.className = 'toast';
+            toast.innerHTML = `<span>🔔</span> ${text}`; container.appendChild(toast);
             setTimeout(() => { toast.remove(); }, 1200);
         }
-
-        // ==========================================
-        // 6. 核心逻辑：查询成绩与动画
-        // ==========================================
-        
-        // S级动画：左右喷射彩带
-        function animRankS() {
-            var duration = 3000; var end = Date.now() + duration;
-            (function frame() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffd700', '#ff0000'] });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffd700', '#ff0000'] });
-                if (Date.now() < end) requestAnimationFrame(frame);
-            }());
-        }
-        // A级动画：底部喷射绿色系纸屑
-        function animRankA() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#34d399', '#065f46'] }); }
-        // B级动画：星星形状
-        function animRankB() {
-            var defaults = { spread: 360, ticks: 50, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['star'], colors: ['#3b82f6', '#60a5fa', '#93c5fd'] };
-            function shoot() { confetti({ ...defaults, particleCount: 40, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 10, scalar: 0.75, shapes: ['circle'] }); }
-            setTimeout(shoot, 0); setTimeout(shoot, 100); setTimeout(shoot, 200);
-        }
-        // C级动画：简单的灰色方块掉落
-        function animRankC() {
-             var end = Date.now() + 2000;
-             (function frame() {
-                confetti({ particleCount: 2, angle: 270, spread: 0, origin: { x: Math.random(), y: 0 }, colors: ['#9ca3af'], shapes: ['square'], gravity: 2, scalar: 0.8 });
-                if (Date.now() < end) requestAnimationFrame(frame);
-             }());
-        }
-
-        // 点击“查询”按钮触发的函数
-        async function checkGrade() {
-            const nameInput = document.getElementById('nameInput');
-            const birthInput = document.getElementById('birthInput');
-            
-            const name = nameInput.value.trim();
-            const birth = birthInput.value.trim();
-            
-            const resultDiv = document.getElementById('result');
-            const nameDiv = document.getElementById('nameDisplay');
-            const scoreDiv = document.getElementById('scoreDisplay');
-            const honorDiv = document.getElementById('honorDisplay');
-            
-            // 重置显示区域
-            resultDiv.className = "result-area"; resultDiv.style.display = "none";
-            honorDiv.innerHTML = "";
-            
-            // 表单校验：为空时触发抖动动画
-            if (!name) { nameInput.classList.add('shake'); setTimeout(() => nameInput.classList.remove('shake'), 400); return; }
-            if (!birth) { birthInput.classList.add('shake'); setTimeout(() => birthInput.classList.remove('shake'), 400); return; }
-
-            // 模拟极短的查询延迟 (50ms)，防止界面闪烁太快
-            setTimeout(() => {
-                resultDiv.style.display = "block";
-                
-                // 在数据库中查找姓名
-                const studentByName = db.find(s => s.n === name);
-
-                if (studentByName) {
-                    // 校验生日
-                    if (studentByName.b === birth) {
-                        // 1. 验证成功，显示成绩
-                        nameDiv.innerText = "🎉 " + studentByName.n + " 同学";
-                        scoreDiv.innerHTML = studentByName.s;
-                        document.getElementById('searchBtn').disabled = true; // 禁用按钮防止重复点击
-
-                        // 2. 联网广播：告诉其他人“我查完了”
-                        if (globalChannel) {
-                            globalChannel.send({ 
-                                type: 'broadcast', event: 'check_success', 
-                                payload: { name: studentByName.n, score: studentByName.t } 
-                            });
-                            // 更新自己的状态，新进来的人能看到我查过了
-                            globalChannel.track({
-                                online_at: new Date().toISOString(),
-                                latest_check: { name: studentByName.n, score: studentByName.t }
-                            });
-                        }
-
-                        // 3. 根据总分展示不同的特效和称号
-                        if (studentByName.t >= 270) { 
-                            resultDiv.classList.add("rank-s"); 
-                            honorDiv.innerHTML = '<div class="honor-title" style="color:#854d0e">👑 荣誉时刻</div>';
-                            animRankS(); 
-                        }
-                        else if (studentByName.t >= 240) { 
-                            resultDiv.classList.add("rank-a"); 
-                            honorDiv.innerHTML = '<div class="honor-title" style="color:#065f46">🌿 卓越成长</div>';
-                            animRankA(); 
-                        }
-                        else if (studentByName.t >= 210) { 
-                            resultDiv.classList.add("rank-b"); 
-                            honorDiv.innerHTML = '<div class="honor-title" style="color:#1e40af">✨ 未来可期</div>';
-                            animRankB(); 
-                        }
-                        else { 
-                            resultDiv.classList.add("rank-c"); 
-                            honorDiv.innerHTML = '<div class="honor-title" style="color:#4b5563">🌱 厚积薄发</div>';
-                            animRankC(); 
-                        }
-
-                    } else {
-                        // 姓名对，生日错
-                        nameDiv.innerText = "🔒 验证失败";
-                        scoreDiv.innerHTML = "姓名正确，但生日输入错误。<br>请核对后重试 (例如: 0101)。";
-                        resultDiv.classList.add("rank-c");
-                    }
-                } else {
-                    // 姓名不存在
-                    nameDiv.innerText = "🚫 查无此人";
-                    scoreDiv.innerHTML = "数据库中没有找到该姓名。<br>请检查是否有错别字。";
-                    resultDiv.classList.add("rank-c");
-                }
-            }, 50);
-        }
-
-        // 页面加载完毕后，启动联网功能
-        window.onload = initLiveCount;
     </script>
 </body>
 </html>
