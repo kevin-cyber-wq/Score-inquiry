@@ -1,801 +1,845 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>凯文老师de✨魔法成绩屋✨</title>
-    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
-    
-    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <style>
-        /* ==================== 
-           CSS 样式区域 
-           建议顺序：布局 > 颜色/背景 > 字体 > 动画
-        ==================== */
-        
-        /* 全局设置 */
-        body { 
-            background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); 
-            /* height: 100vh;  <-- 删除这一行，不要死板的固定高度 */
-            min-height: 100vh; /* <-- 改成最小高度，这样内容少时满屏，内容多时自动拉长 */
-            
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-family: -apple-system, sans-serif; 
-            margin: 0; 
-            
-            /* overflow: hidden; <-- 删除这一行！这是罪魁祸首 */
-            overflow-y: auto;    /* <-- 改成这个：允许垂直方向滚动 */
-            
-            -webkit-tap-highlight-color: transparent; 
-            position: relative; 
-            
-            /* 新增：给上下留点呼吸空间，防止卡片贴边不好看 */
-            padding-top: 20px;
-            padding-bottom: 20px;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>凯文老师de✨魔法成绩屋✨</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✨</text></svg>">
+    
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    
+    <style>
+        /* ==================== 
+           CSS 样式区域 
+           建议顺序：布局 > 颜色/背景 > 字体 > 动画
+        ==================== */
+        
+        /* 全局设置 */
+        body { 
+            background-image: linear-gradient(120deg, #fccb90 0%, #d57eeb 100%); 
+            /* height: 100vh;  <-- 删除这一行，不要死板的固定高度 */
+            min-height: 100vh; /* <-- 改成最小高度，这样内容少时满屏，内容多时自动拉长 */
+            
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-family: -apple-system, sans-serif; 
+            margin: 0; 
+            
+            /* overflow: hidden; <-- 删除这一行！这是罪魁祸首 */
+            overflow-y: auto;    /* <-- 改成这个：允许垂直方向滚动 */
+            
+            -webkit-tap-highlight-color: transparent; 
+            position: relative; 
+            
+            /* 新增：给上下留点呼吸空间，防止卡片贴边不好看 */
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
 
-        /* 背景魔法星尘动画 */
-        .magic-dust { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background-image: radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px); 
-            background-size: 50px 50px; 
-            opacity: 0.5; z-index: 1; pointer-events: none; 
-            animation: twinkle 6s infinite linear; 
-        }
-        @keyframes twinkle { 
-            0% { transform: translateY(0); opacity: 0.3; } 
-            50% { opacity: 0.7; } 
-            100% { transform: translateY(-30px); opacity: 0.3; } 
-        }
+        /* 背景魔法星尘动画 */
+        .magic-dust { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background-image: radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px); 
+            background-size: 50px 50px; 
+            opacity: 0.5; z-index: 1; pointer-events: none; 
+            animation: twinkle 6s infinite linear; 
+        }
+        @keyframes twinkle { 
+            0% { transform: translateY(0); opacity: 0.3; } 
+            50% { opacity: 0.7; } 
+            100% { transform: translateY(-30px); opacity: 0.3; } 
+        }
 
-        /* 顶部滚动战报条 (Ticker) */
-        .ticker-container { 
-            position: fixed; top: 15px; left: 50%; 
-            transform: translateX(-50%); /* 经典的水平居中写法 */
-            width: 94%; max-width: 650px; height: 80px; 
-            background: rgba(255, 255, 255, 0.65); 
-            backdrop-filter: blur(12px); /* 毛玻璃特效 */
-            border-radius: 20px; 
-            z-index: 100; overflow: hidden; 
-            display: flex; flex-direction: column; justify-content: space-evenly; 
-            /* 左右两侧渐变透明，让滚动看起来更自然 */
-            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); 
-            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); 
-            opacity: 0; transition: opacity 0.5s; 
-        }
-        .ticker-active { opacity: 1; } /* 有数据时才显示 */
-        
-        /* 滚动动画定义 */
-        .ticker-row { display: flex; gap: 16px; width: max-content; align-items: center; height: 30px; }
-        .row-top { animation: scrollLeftToRight 25s linear infinite; }
-        .row-bottom { transform: translateX(100vw); animation: scrollRightToLeft 30s linear infinite; }
-        @keyframes scrollLeftToRight { 0% { transform: translateX(-100%); } 100% { transform: translateX(100vw); } }
-        @keyframes scrollRightToLeft { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+        /* 顶部滚动战报条 (Ticker) */
+        .ticker-container { 
+            position: fixed; top: 15px; left: 50%; 
+            transform: translateX(-50%); /* 经典的水平居中写法 */
+            width: 94%; max-width: 650px; height: 80px; 
+            background: rgba(255, 255, 255, 0.65); 
+            backdrop-filter: blur(12px); /* 毛玻璃特效 */
+            border-radius: 20px; 
+            z-index: 100; overflow: hidden; 
+            display: flex; flex-direction: column; justify-content: space-evenly; 
+            /* 左右两侧渐变透明，让滚动看起来更自然 */
+            mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); 
+            -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); 
+            opacity: 0; transition: opacity 0.5s; 
+        }
+        .ticker-active { opacity: 1; } /* 有数据时才显示 */
+        
+        /* 滚动动画定义 */
+        .ticker-row { display: flex; gap: 16px; width: max-content; align-items: center; height: 30px; }
+        .row-top { animation: scrollLeftToRight 25s linear infinite; }
+        .row-bottom { transform: translateX(100vw); animation: scrollRightToLeft 30s linear infinite; }
+        @keyframes scrollLeftToRight { 0% { transform: translateX(-100%); } 100% { transform: translateX(100vw); } }
+        @keyframes scrollRightToLeft { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
 
-        /* 战报小胶囊样式 */
-        .t-pill { 
-            display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; 
-            border-radius: 30px; background: #fff; font-size: 11px; font-weight: 600; color: #555; 
-            white-space: nowrap; 
-        }
-        /* 等级颜色定义 */
-        .s-tier .emoji-box { background: linear-gradient(135deg, #ffd700, #fdb931); }
-        .a-tier .emoji-box { background: linear-gradient(135deg, #10b981, #34d399); }
-        .b-tier .emoji-box { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
-        .c-tier .emoji-box { background: #9ca3af; }
-        .emoji-box { width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; }
+        /* 战报小胶囊样式 */
+        .t-pill { 
+            display: flex; align-items: center; gap: 6px; padding: 3px 10px 3px 4px; 
+            border-radius: 30px; background: #fff; font-size: 11px; font-weight: 600; color: #555; 
+            white-space: nowrap; 
+        }
+        /* 等级颜色定义 */
+        .s-tier .emoji-box { background: linear-gradient(135deg, #ffd700, #fdb931); }
+        .a-tier .emoji-box { background: linear-gradient(135deg, #10b981, #34d399); }
+        .b-tier .emoji-box { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+        .c-tier .emoji-box { background: #9ca3af; }
+        .emoji-box { width: 22px; height: 22px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; }
 
-        /* 主卡片 (Glassmorphism 玻璃拟态) */
-        .card { 
-            background: rgba(255, 255, 255, 0.94); 
-            padding: 25px 30px 70px 30px; 
-            border-radius: 28px; 
-            box-shadow: 0 15px 45px rgba(0,0,0,0.1); 
-            text-align: center; width: 320px; 
-            position: relative; z-index: 10; 
-            border: 1px solid rgba(255, 255, 255, 0.6); 
-            margin-top: 40px; 
-        }
+        /* 主卡片 (Glassmorphism 玻璃拟态) */
+        .card { 
+            background: rgba(255, 255, 255, 0.94); 
+            padding: 25px 30px 70px 30px; 
+            border-radius: 28px; 
+            box-shadow: 0 15px 45px rgba(0,0,0,0.1); 
+            text-align: center; width: 320px; 
+            position: relative; z-index: 10; 
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            margin-top: 40px; 
+        }
+/* ==================== 
+           标题样式 (魔法流光风) 
+           ==================== */
+           h1 { 
+            color: #ff8fa3; /* 这种粉色更嫩，像马卡龙 */
+            font-size: 26px; 
+            margin-bottom: 5px; 
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px rgba(255, 230, 235, 1); /* 加一个实心投影，像贴纸 */
+        }
 
-        /* 状态栏 (在线人数等) */
-        .system-status { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10px; color: #8395a7; margin-bottom: 25px; background: #f8f9fa; padding: 7px 12px; border-radius: 50px; border: 1px solid #eeeff1; }
-        
-        .status-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 5px; 
-            line-height: 1; 
-        }
-       
-        .live-dot { width: 6px; height: 6px; background-color: #2ecc71; border-radius: 50%; animation: pulse 2.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.4; transform: scale(0.9); } }
+        p.subtitle { 
+            color: #a29bfe; /* 浅紫色，呼应背景的紫色 */
+            font-size: 13px; 
+            margin-bottom: 20px; 
+            letter-spacing: 0.5px;
+        }
+        /* 状态栏 (在线人数等) */
+        .system-status { display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 10px; color: #8395a7; margin-bottom: 25px; background: #f8f9fa; padding: 7px 12px; border-radius: 50px; border: 1px solid #eeeff1; }
+        
+        .status-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            line-height: 1; 
+        }
+       
+        .live-dot { width: 6px; height: 6px; background-color: #2ecc71; border-radius: 50%; animation: pulse 2.5s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; transform: scale(0.9); } 50% { opacity: 1; transform: scale(1.1); } 100% { opacity: 0.4; transform: scale(0.9); } }
 
-        /* 输入框与按钮 */
-        .input-group { margin-bottom: 15px; }
-        input { width: 85%; padding: 13px; border: 1.5px solid #f1f2f6; border-radius: 14px; outline: none; font-size: 16px; text-align: center; display: block; margin: 0 auto; transition: all 0.3s; }
-        input:focus { border-color: #ff9a9e; }
-        button { width: 90%; margin-top: 10px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border: none; padding: 13px 0; border-radius: 50px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: transform 0.2s; }
-        button:active { transform: scale(0.97); }
-        button:disabled { background: #ccc; cursor: not-allowed; }
+        /* 输入框与按钮 */
+        .input-group { margin-bottom: 15px; }
+        input { width: 85%; padding: 13px; border: 1.5px solid #f1f2f6; border-radius: 14px; outline: none; font-size: 16px; text-align: center; display: block; margin: 0 auto; transition: all 0.3s; }
+        input:focus { border-color: #ff9a9e; }
+        button { width: 90%; margin-top: 10px; background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border: none; padding: 13px 0; border-radius: 50px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: transform 0.2s; }
+        button:active { transform: scale(0.97); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* 错误提示时的抖动动画 */
-        .shake { animation: shake 0.4s ease-in-out; border-color: #ff6b81 !important; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+        /* 错误提示时的抖动动画 */
+        .shake { animation: shake 0.4s ease-in-out; border-color: #ff6b81 !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
 
-        /* 结果区域 */
-        .result-area { margin-top: 25px; padding: 20px; border-radius: 18px; display: none; line-height: 1.8; transition: all 0.5s; }
-        .student-name { font-size: 19px; font-weight: bold; color: #2f3542; margin-bottom: 8px; }
-        
-        /* 结果框的不同等级边框颜色 */
-        .rank-s { border: 2px solid #ffd700; background: linear-gradient(135deg, #fffcf2, #fff7d1); }
-        .rank-a { border: 2px solid #10b981; background: linear-gradient(135deg, #f0fff4, #d1fae5); }
-        .rank-b { border: 2px solid #3b82f6; background: linear-gradient(135deg, #eff6ff, #dbeafe); }
-        .rank-c { border: 2px dashed #9ca3af; background: #f9fafb; }
+        /* 结果区域 */
+        .result-area { margin-top: 25px; padding: 20px; border-radius: 18px; display: none; line-height: 1.8; transition: all 0.5s; }
+        .student-name { font-size: 19px; font-weight: bold; color: #2f3542; margin-bottom: 8px; }
+        
+        /* 结果框的不同等级边框颜色 */
+        .rank-s { border: 2px solid #ffd700; background: linear-gradient(135deg, #fffcf2, #fff7d1); }
+        .rank-a { border: 2px solid #10b981; background: linear-gradient(135deg, #f0fff4, #d1fae5); }
+        .rank-b { border: 2px solid #3b82f6; background: linear-gradient(135deg, #eff6ff, #dbeafe); }
+        .rank-c { border: 2px dashed #9ca3af; background: #f9fafb; }
 
-        /* 底部版权 */
-        .copyright { position: absolute; bottom: 25px; left: 0; width: 100%; font-size: 11px; color: #ff6b81; font-weight: 600; opacity: 0.8; }
+        /* 底部版权 */
+        .copyright { position: absolute; bottom: 25px; left: 0; width: 100%; font-size: 11px; color: #ff6b81; font-weight: 600; opacity: 0.8; }
 
-        /* 弹幕输入条 */
-        /* ==================== 
-           灵动胶囊样式 (半透明磨砂版) 
-           ==================== */
-           .dm-bar { 
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            
-            /* 默认状态：小胶囊 */
-            width: 140px; height: 44px; 
-            
-            /* 👇 关键修改：透明度从 0.9 改为 0.4，让它变透 */
-            background: rgba(255, 255, 255, 0.4); 
-            
-            /* 👇 关键修改：增加模糊度，实现“磨砂玻璃”效果 */
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px); /* 兼容苹果手机 */
-            
-            border-radius: 50px; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
-            z-index: 999; 
-            overflow: hidden; 
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
-            
-            /* 边框也调淡一点，更精致 */
-            border: 1px solid rgba(255,255,255,0.4);
-        }
+        /* 弹幕输入条 */
+        /* ==================== 
+           灵动胶囊样式 (半透明磨砂版) 
+           ==================== */
+           .dm-bar { 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            
+            /* 默认状态：小胶囊 */
+            width: 140px; height: 44px; 
+            
+            /* 👇 关键修改：透明度从 0.9 改为 0.4，让它变透 */
+            background: rgba(255, 255, 255, 0.4); 
+            
+            /* 👇 关键修改：增加模糊度，实现“磨砂玻璃”效果 */
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px); /* 兼容苹果手机 */
+            
+            border-radius: 50px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
+            z-index: 999; 
+            overflow: hidden; 
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
+            
+            /* 边框也调淡一点，更精致 */
+            border: 1px solid rgba(255,255,255,0.4);
+        }
 
-        /* 激活状态：变宽 + 变实 */
-        .dm-bar.active { 
-            width: 90%; max-width: 400px; 
-            
-            /* 👇 关键点：展开输入时，背景变回不透明，保证看清文字 */
-            background: rgba(255, 255, 255, 0.95); 
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2); /* 展开时阴影加深 */
-            border: 1px solid rgba(255,255,255,0.8);
-        }
+        /* 激活状态：变宽 + 变实 */
+        .dm-bar.active { 
+            width: 90%; max-width: 400px; 
+            
+            /* 👇 关键点：展开输入时，背景变回不透明，保证看清文字 */
+            background: rgba(255, 255, 255, 0.95); 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2); /* 展开时阴影加深 */
+            border: 1px solid rgba(255,255,255,0.8);
+        }
 
-       /* 状态 A: 触发按钮 (平时半透明) */
-       .dm-trigger { 
-            width: 100%; height: 100%; 
-            display: flex; justify-content: center; align-items: center; 
-            font-size: 14px; font-weight: bold; 
-            color: #333; /* 字体颜色稍微深一点点，防止透明后太淡看不清 */
-            cursor: pointer; gap: 5px;
-            
-            /* 👇 关键修改：默认透明度设为 0.5，让文字和图标也半透明 */
-            opacity: 0.5; 
-            
-            transition: opacity 0.2s;
-        }
-        /* ✨ 交互细节：手指按住或鼠标悬停时，文字变实，给个反馈 */
-        .dm-trigger:active, .dm-trigger:hover {
-            opacity: 0.9;
-        }
-        /* 展开时隐藏 (这一段保持不变，必须有！) */
-        .dm-bar.active .dm-trigger { 
-            opacity: 0; pointer-events: none; position: absolute; 
-        }
+       /* 状态 A: 触发按钮 (平时半透明) */
+       .dm-trigger { 
+            width: 100%; height: 100%; 
+            display: flex; justify-content: center; align-items: center; 
+            font-size: 14px; font-weight: bold; 
+            color: #333; /* 字体颜色稍微深一点点，防止透明后太淡看不清 */
+            cursor: pointer; gap: 5px;
+            
+            /* 👇 关键修改：默认透明度设为 0.5，让文字和图标也半透明 */
+            opacity: 0.5; 
+            
+            transition: opacity 0.2s;
+        }
+        /* ✨ 交互细节：手指按住或鼠标悬停时，文字变实，给个反馈 */
+        .dm-trigger:active, .dm-trigger:hover {
+            opacity: 0.9;
+        }
+        /* 展开时隐藏 (这一段保持不变，必须有！) */
+        .dm-bar.active .dm-trigger { 
+            opacity: 0; pointer-events: none; position: absolute; 
+        }
 
-        /* 状态 B: 输入内容区 */
-        .dm-content { 
-            width: 100%; height: 100%; 
-            display: flex; align-items: center; padding: 0 5px 0 15px; 
-            opacity: 0; pointer-events: none; 
-            transition: opacity 0.3s 0.1s; /* 稍微延迟一点显示，等宽度变宽 */
-        }
-        .dm-bar.active .dm-content { 
-            opacity: 1; pointer-events: auto; 
-        }
+        /* 状态 B: 输入内容区 */
+        /* 修改区域 1：内容容器 */
+        .dm-content { 
+    width: 100%; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+    
+    /* 👇 关键修复 1：加上这个，padding 就不会撑大容器了 */
+    box-sizing: border-box; 
+    
+    /* 👇 关键修复 2：右边距调整为 12px，避免圆角切到按钮 */
+    padding: 0 12px 0 15px; 
+    
+    opacity: 0; 
+    pointer-events: none; 
+    transition: opacity 0.3s 0.1s; 
+}
+        .dm-bar.active .dm-content { 
+            opacity: 1; pointer-events: auto; 
+        }
 
-        .dm-input { 
-            flex: 1; border: none; background: transparent; outline: none; 
-            font-size: 15px; color: #333; 
-        }
+        .dm-input { 
+            flex: 1; border: none; background: transparent; outline: none; 
+            font-size: 15px; color: #333; 
+        }
 
-        .dm-btn { 
-            width: 36px !important; height: 36px; padding: 0; margin: 0 5px; 
-            border-radius: 50%; display: flex; justify-content: center; align-items: center; 
-            font-size: 18px; 
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); 
-            box-shadow: 0 4px 10px rgba(255, 107, 129, 0.3);
-        }
-        
-        .dm-close {
-            width: 24px; height: 24px; color: #aaa; font-size: 14px; 
-            display: flex; justify-content: center; align-items: center; 
-            cursor: pointer; margin-right: 5px; border-radius: 50%;
-            background: #f1f2f6;
-        }
-        
-        /* 飘动的弹幕 */
-        .dm-item { 
-            position: fixed; white-space: nowrap; font-weight: bold; font-size: 18px; 
-            text-shadow: 1.5px 1.5px 3px rgba(0,0,0,0.3); pointer-events: none; z-index: 2000; left: 0; 
-            animation: fly linear forwards; font-family: "YouYuan", "幼圆", sans-serif; 
-        }
-        @keyframes fly { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
-        
-        /* 顶部通知 Toast */
-        #notification-container { position: fixed; bottom: 85px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-        .toast { background: rgba(255, 255, 255, 0.95); padding: 10px 18px; border-radius: 50px; border-left: 4px solid #2ecc71; animation: slideIn 0.4s, fadeOut 0.5s 3.5s forwards; }
-        @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
-        @keyframes fadeOut { to { opacity: 0; transform: translateY(20px); } }
-    </style>
+        .dm-btn { 
+    /* 👇 必须加上 flex-shrink: 0，这是防止按钮被挤扁的“定身咒” */
+    flex-shrink: 0; 
+
+    width: 36px !important; height: 36px; 
+    border-radius: 50%; 
+    display: flex; justify-content: center; align-items: center; 
+    font-size: 18px; 
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); 
+    box-shadow: 0 4px 10px rgba(255, 107, 129, 0.3);
+    
+    /* 👇 调整边距：左边把输入框隔开，右边不需要太多因为父容器有 padding */
+    margin: 0;
+    margin-left: 8px; 
+}
+        
+        
+        
+        /* 飘动的弹幕 */
+        .dm-item { 
+            position: fixed; white-space: nowrap; font-weight: bold; font-size: 18px; 
+            text-shadow: 1.5px 1.5px 3px rgba(0,0,0,0.3); pointer-events: none; z-index: 2000; left: 0; 
+            animation: fly linear forwards; font-family: "YouYuan", "幼圆", sans-serif; 
+        }
+        @keyframes fly { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
+        
+        /* 顶部通知 Toast */
+        #notification-container { position: fixed; bottom: 85px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: rgba(255, 255, 255, 0.95); padding: 10px 18px; border-radius: 50px; border-left: 4px solid #2ecc71; animation: slideIn 0.4s, fadeOut 0.5s 3.5s forwards; }
+        @keyframes slideIn { from { transform: translateX(120%); } to { transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(20px); } }
+    </style>
 </head>
 
 <body>
-    <div class="magic-dust"></div>
+    <div class="magic-dust"></div>
 
-    <audio id="sfx-magic" src="magic.mp3" preload="auto"></audio>
-    <audio id="sfx-win" src="win.mp3" preload="auto"></audio>
-    <audio id="sfx-fail" src="fail.mp3" preload="auto"></audio>
+    <audio id="sfx-magic" src="magic.mp3" preload="auto"></audio>
+    <audio id="sfx-win" src="win.mp3" preload="auto"></audio>
+    <audio id="sfx-fail" src="fail.mp3" preload="auto"></audio>
 
-    <div class="ticker-container" id="tickerContainer">
-        <div class="ticker-row row-top" id="trackTop"></div>
-        <div class="ticker-row row-bottom" id="trackBottom"></div>
-    </div>
+    <div class="ticker-container" id="tickerContainer">
+        <div class="ticker-row row-top" id="trackTop"></div>
+        <div class="ticker-row row-bottom" id="trackBottom"></div>
+    </div>
 
-    <div id="notification-container"></div>
+    <div id="notification-container"></div>
 
-    <div class="card">
-        <h1>🐰 期末成绩查询</h1>
-        <p class="subtitle">请输入姓名和生日召唤成绩单</p>
-        
-        <div class="system-status">
-            <div class="status-item"><span>⬢ 数据库 <span id="dbStatus" style="color:#2ecc71">正常</span></span></div>
-            <div style="width:1px; height:10px; background:#e0e0e0;"></div>
-            <div class="status-item"><span>访问 <span id="busuanzi_value_page_pv" class="data-num">...</span></span></div>
-            <div style="width:1px; height:10px; background:#e0e0e0;"></div>
-            <div class="status-item">
-                <div class="live-dot"></div>
-                <span>在线 <span id="onlineCount" class="data-num">1</span></span>
-            </div>
-        </div>
-        
-        <div class="input-group"><input type="text" id="nameInput" placeholder="输入姓名" enterkeyhint="next"></div>
-        <div class="input-group"><input type="tel" id="birthInput" placeholder="4位生日 (如: 0101)" maxlength="4" enterkeyhint="go"></div>
-        
-        <button id="searchBtn" onclick="checkGrade()">✨ 查询 ✨</button>
-        
-        <div id="result" class="result-area">
-            <div id="nameDisplay" class="student-name"></div>
-            <div id="scoreDisplay"></div>
-            <div id="chartContainer" style="position: relative; height: 220px; width: 90%; margin: 10px auto; display: none;">
-                <canvas id="scoreChart"></canvas>
-            </div>
-            <div id="honorDisplay"></div>
-        </div>
-        
-        <div class="copyright">&copy; 2026 Designed by Kevin</div>
-    </div>
+    <div class="card">
+        <h1>✨ 魔法学期·结业式</h1>
+    <p class="subtitle">输入（姓名+生日）召唤成绩单</p>
+        
+        <div class="system-status">
+            <div class="status-item"><span>⬢ 数据库 <span id="dbStatus" style="color:#2ecc71">正常</span></span></div>
+            <div style="width:1px; height:10px; background:#e0e0e0;"></div>
+            <div class="status-item"><span>访问 <span id="busuanzi_value_page_pv" class="data-num">...</span></span></div>
+            <div style="width:1px; height:10px; background:#e0e0e0;"></div>
+            <div class="status-item">
+                <div class="live-dot"></div>
+                <span>在线 <span id="onlineCount" class="data-num">1</span></span>
+            </div>
+        </div>
+        
+        <div class="input-group"><input type="text" id="nameInput" placeholder="输入姓名" enterkeyhint="next"></div>
+        <div class="input-group"><input type="tel" id="birthInput" placeholder="4位生日 (如: 0101)" maxlength="4" enterkeyhint="go"></div>
+        
+        <button id="searchBtn" onclick="checkGrade()">✨ 查询 ✨</button>
+        
+        <div id="result" class="result-area">
+            <div id="nameDisplay" class="student-name"></div>
+            <div id="scoreDisplay"></div>
+            <div id="chartContainer" style="position: relative; height: 220px; width: 90%; margin: 10px auto; display: none;">
+                <canvas id="scoreChart"></canvas>
+            </div>
+            <div id="honorDisplay"></div>
+        </div>
+        
+        <div class="copyright">&copy; 2026 Designed by Kevin</div>
+    </div>
 
-    <div class="dm-bar" id="dmBar">
-        <div class="dm-trigger" onclick="toggleDmBar()">
-            <span>💬 发射弹幕</span>
-        </div>
+    <div class="dm-bar" id="dmBar">
+        <div class="dm-trigger" onclick="toggleDmBar()">
+            <span>💬 发射弹幕</span>
+        </div>
 
-        <div class="dm-content">
-            <input type="text" id="dmInput" class="dm-input" placeholder="✨ 写下你的魔法..." maxlength="10" enterkeyhint="send">
-            <button id="dmBtn" class="dm-btn" onclick="sendDanmaku()">🚀</button>
-            <div class="dm-close" onclick="toggleDmBar()">✕</div>
-        </div>
-    </div>
+        <div class="dm-content">
+            <input type="text" id="dmInput" class="dm-input" placeholder="✨ 写下你的魔法..." maxlength="10" enterkeyhint="send">
+            <button id="dmBtn" class="dm-btn" onclick="sendDanmaku()">🚀</button>
+        </div>
+    </div>
 
-    <script>
-        // ==========================================
-        // 1. 全局配置与初始化
-        // ==========================================
-        const supabaseUrl = 'https://ijyctklfafrnerowwgii.supabase.co'; 
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqeWN0a2xmYWZybmVyb3d3Z2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTc4NjEsImV4cCI6MjA4NTQ3Mzg2MX0._hYKSgibEQyhmyexM9V3R2Z5A0GesRBRSCwX3Ed77C8'; 
-        
-        let supabaseClient;
-        let globalChannel = null;       // 用于实时广播的频道
-        let scoreChartInstance = null;  // 记录图表实例，用于销毁重建
-        let displayedNames = new Set(); // 记录已上墙的名字，防止滚动条重复
-        let toggleRow = true;           // 控制滚动条上下行交替
+    <script>
+        // ==========================================
+        // 1. 全局配置与初始化
+        // ==========================================
+        const supabaseUrl = 'https://ijyctklfafrnerowwgii.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqeWN0a2xmYWZybmVyb3d3Z2lpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4OTc4NjEsImV4cCI6MjA4NTQ3Mzg2MX0._hYKSgibEQyhmyexM9V3R2Z5A0GesRBRSCwX3Ed77C8'; 
+        
+        let supabaseClient;
+        let globalChannel = null;       // 用于实时广播的频道
+        let scoreChartInstance = null;  // 记录图表实例，用于销毁重建
+        let displayedNames = new Set(); // 记录已上墙的名字，防止滚动条重复
+        let toggleRow = true;           // 控制滚动条上下行交替
 
-        // 初始化 Supabase 客户端
-        try {
-            if (typeof supabase !== 'undefined' && supabase.createClient) {
-                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-            }
-        } catch (e) { console.error("Supabase init error:", e); }
+        // 初始化 Supabase 客户端
+        try {
+            if (typeof supabase !== 'undefined' && supabase.createClient) {
+                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch (e) { console.error("Supabase init error:", e); }
 
-        // ==========================================
-        // 2. 页面生命周期
-        // ==========================================
-        
-        // 网页加载完成时执行
-        window.onload = function() {
-            initLiveCount();      // 1. 连接实时频道 (在线人数/接收弹幕)
-            loadHistory();        // 2. 读取数据库里的历史查询记录
-            loadRecentDanmaku();  // 3. 读取数据库里的最近弹幕
+        // ==========================================
+        // 2. 页面生命周期
+        // ==========================================
+        
+        // 网页加载完成时执行
+        window.onload = function() {
+            initLiveCount();      // 1. 连接实时频道 (在线人数/接收弹幕)
+            loadHistory();        // 2. 读取数据库里的历史查询记录
+            loadRecentDanmaku();  // 3. 读取数据库里的最近弹幕
 
-            // 4. 小彩蛋：随机设置弹幕按钮的文案
-            const btnTexts = ["✨ 施法", "🚀 发射", "biu~", "上墙", "变身 🪄"];
-            const randomText = btnTexts[Math.floor(Math.random() * btnTexts.length)];
-            const btn = document.getElementById('dmBtn');
-            if(btn) btn.innerText = randomText;
+            // 4. 小彩蛋：随机设置弹幕按钮的文案
+            const btnTexts = ["✨ 施法", "🚀 发射", "biu~", "上墙", "变身 🪄"];
+            const randomText = btnTexts[Math.floor(Math.random() * btnTexts.length)];
+            const btn = document.getElementById('dmBtn');
+            if(btn) btn.innerText = randomText;
 
-            // 【新增】点击屏幕空白处，自动收起弹幕栏
-    document.addEventListener('click', function(e) {
-        const bar = document.getElementById('dmBar');
-        // 如果点击的不是弹幕栏本身，也不是弹幕栏里面的东西
-        if (!bar.contains(e.target)) {
-            bar.classList.remove('active');
-            document.getElementById('dmInput').blur();
-        }
-    });
-        };
+            // 【新增】点击屏幕空白处，自动收起弹幕栏
+    document.addEventListener('click', function(e) {
+        const bar = document.getElementById('dmBar');
+        // 如果点击的不是弹幕栏本身，也不是弹幕栏里面的东西
+        if (!bar.contains(e.target)) {
+            bar.classList.remove('active');
+            document.getElementById('dmInput').blur();
+        }
+    });
+        };
 
-        // ==========================================
-        // 3. 核心业务逻辑 (查分)
-        // ==========================================
-        
-        async function checkGrade() {
-            // 获取 DOM 元素
-            const nameInput = document.getElementById('nameInput');
-            const birthInput = document.getElementById('birthInput');
-            const resultDiv = document.getElementById('result');
-            const searchBtn = document.getElementById('searchBtn');
-            const chartBox = document.getElementById('chartContainer');
+        // ==========================================
+        // 3. 核心业务逻辑 (查分)
+        // ==========================================
+        
+        async function checkGrade() {
+            // 获取 DOM 元素
+            const nameInput = document.getElementById('nameInput');
+            const birthInput = document.getElementById('birthInput');
+            const resultDiv = document.getElementById('result');
+            const searchBtn = document.getElementById('searchBtn');
+            const chartBox = document.getElementById('chartContainer');
 
-            const name = nameInput.value.trim();
-            const birth = birthInput.value.trim();
-            
-            // --- Step 0: 重置界面状态 ---
-            resultDiv.style.display = "none";
-            document.getElementById('honorDisplay').innerHTML = "";
-            if(chartBox) chartBox.style.display = "none"; // 默认隐藏图表
-            
-            // --- Step 1: 基础校验 (空值检查) ---
-            if (!name) { shakeInput(nameInput); return; }
-            if (!birth) { shakeInput(birthInput); return; }
+            const name = nameInput.value.trim();
+            const birth = birthInput.value.trim();
+            
+            // --- Step 0: 重置界面状态 ---
+            resultDiv.style.display = "none";
+            document.getElementById('honorDisplay').innerHTML = "";
+            if(chartBox) chartBox.style.display = "none"; // 默认隐藏图表
+            
+            // --- Step 1: 基础校验 (空值检查) ---
+            if (!name) { shakeInput(nameInput); return; }
+            if (!birth) { shakeInput(birthInput); return; }
 
-            // 播放点击音效
-            playSound('sfx-magic');
+            // 播放点击音效
+            playSound('sfx-magic');
 
-            // --- Step 2: 锁定界面 & 查询数据库 ---
-            searchBtn.disabled = true;
-            searchBtn.innerText = "🔮 正在翻阅魔法书...";
+            // --- Step 2: 锁定界面 & 查询数据库 ---
+            searchBtn.disabled = true;
+            searchBtn.innerText = "🔮 正在翻阅魔法书...";
 
-            // 核心查询：只根据【姓名】查，不带生日
-            const { data, error } = await supabaseClient
-                .from('student_scores') 
-                .select('*')
-                .eq('name', name)
-                .maybeSingle(); // 只取一条
+            // 核心查询：只根据【姓名】查，不带生日
+            const { data, error } = await supabaseClient
+                .from('student_scores') 
+                .select('*')
+                .eq('name', name)
+                .maybeSingle(); // 只取一条
 
-            searchBtn.disabled = false;
-            searchBtn.innerText = "✨ 查询 ✨";
+            searchBtn.disabled = false;
+            searchBtn.innerText = "✨ 查询 ✨";
 
-            // --- Step 3: 处理结果 ---
-            
-            // 情况A: 数据库报错 (断网等)
-            if (error) {
-                showError("🚫 连接断开", "魔法书打不开了，请检查网络。");
-                return;
-            }
+            // --- Step 3: 处理结果 ---
+            
+            // 情况A: 数据库报错 (断网等)
+            if (error) {
+                showError("🚫 连接断开", "魔法书打不开了，请检查网络。");
+                return;
+            }
 
-            // 情况B: 没查到人 (名字不存在)
-            if (!data) {
-                showError("👻 查无此人", `魔法书里没有找到 <strong>${name}</strong> 同学。<br>是不是名字写了错别字？`);
-                shakeInput(nameInput); // 提示名字错了
-            } else {
-                // 情况C: 查到人了，校验生日密码
-                if (data.birthday === birth) {
-                    // ✅ 验证成功！
-                    handleSuccess(data, chartBox);
-                } else {
-                    // ❌ 验证失败 (名字对，生日错)
-                    showError("🔒 咒语失效", `找到了 <strong>${name}</strong> 同学，<br>但是【生日咒语】不对哦！<br>提示：请检查是否是4位 (如0101)`);
-                    birthInput.value = ''; 
-                    birthInput.focus();
-                    shakeInput(birthInput); // 提示生日错了
-                }
-            }
-        }
+            // 情况B: 没查到人 (名字不存在)
+            if (!data) {
+                showError("👻 查无此人", `魔法书里没有找到 <strong>${name}</strong> 同学。<br>是不是名字写了错别字？`);
+                shakeInput(nameInput); // 提示名字错了
+            } else {
+                // 情况C: 查到人了，校验生日密码
+                if (data.birthday === birth) {
+                    // ✅ 验证成功！
+                    handleSuccess(data, chartBox);
+                } else {
+                    // ❌ 验证失败 (名字对，生日错)
+                    showError("🔒 咒语失效", `找到了 <strong>${name}</strong> 同学，<br>但是【生日咒语】不对哦！<br>提示：请检查是否是4位 (如0101)`);
+                    birthInput.value = ''; 
+                    birthInput.focus();
+                    shakeInput(birthInput); // 提示生日错了
+                }
+            }
+        }
 
-        // 处理查询成功的逻辑 (抽离出来让代码更整洁)
-        function handleSuccess(data, chartBox) {
-            const resultDiv = document.getElementById('result');
-            resultDiv.style.display = "block";
-            
-            // 显示雷达图容器
-            if(chartBox) chartBox.style.display = "block";
+        // ----------------------------------------------------
+        // 【修改版】查分成功处理函数 (增加了颜色判断)
+        // ----------------------------------------------------
+        function handleSuccess(data, chartBox) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = "block";
+            
+            if(chartBox) chartBox.style.display = "block";
 
-            const score = parseFloat(data.total); 
-            
-            // 填入文字信息
-            document.getElementById('nameDisplay').innerText = "🎉 " + data.name + " 同学";
-            document.getElementById('scoreDisplay').innerHTML = 
-                `语文：${data.chinese}<br>数学：${data.math}<br>英语：${data.english}<br><strong>总分：${score}</strong>`;
-            
-            // 绘制雷达图
-            drawRadarChart(data);
+            const score = parseFloat(data.total); 
+            
+            // 1. ✨ 根据分数决定主题色 (与你的 CSS 等级颜色保持一致)
+            let themeColor = '#9ca3af'; // 默认 C级 (灰色)
+            if (score >= 270) {
+                themeColor = '#ffd700'; // S级 (金色)
+            } else if (score >= 240) {
+                themeColor = '#10b981'; // A级 (绿色)
+            } else if (score >= 210) {
+                themeColor = '#3b82f6'; // B级 (蓝色)
+            }
 
-            // 播放特效和声音
-            playEffectByScore(score);
-            
-            // 记录日志 (用于滚动条)
-            logQuery(data.name, score);
+            // 填入文字信息
+            document.getElementById('nameDisplay').innerText = "🎉 " + data.name + " 同学";
+            document.getElementById('scoreDisplay').innerHTML = 
+                `语文：${data.chinese}<br>数学：${data.math}<br>英语：${data.english}<br><strong>总分：${score}</strong>`;
+            
+            // 2. ✨ 关键点：把算好的 themeColor 传给画图函数
+            drawRadarChart(data, themeColor);
 
-            // 发送广播 (让别人知道有人查分了)
-            if (globalChannel) {
-                globalChannel.send({ type: 'broadcast', event: 'check_success', payload: { name: data.name, score: score } });
-                globalChannel.track({ online_at: new Date().toISOString(), latest_check: { name: data.name, score: score } });
-            }
-            
-            // 锁定按钮，防止重复提交
-            document.getElementById('searchBtn').disabled = true;
-        }
+            playEffectByScore(score);
+            logQuery(data.name, score);
 
-        // 绘制雷达图封装函数
-        function drawRadarChart(data) {
-            const ctx = document.getElementById('scoreChart');
-            
-            // ⚠️ 销毁旧图表，防止重叠
-            if (scoreChartInstance) {
-                scoreChartInstance.destroy();
-            }
-            
-            if (typeof Chart !== 'undefined') {
-                scoreChartInstance = new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: ['语文', '数学', '英语'],
-                        datasets: [{
-                            label: '能力值',
-                            data: [data.chinese, data.math, data.english],
-                            backgroundColor: 'rgba(255, 154, 158, 0.5)',
-                            borderColor: '#ff9a9e',
-                            pointBackgroundColor: '#fff',
-                            pointBorderColor: '#ff9a9e',
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        layout: { padding: 10 }, // 防止文字被切
-                        scales: { 
-                            r: { 
-                                beginAtZero: true, 
-                                max: 100, // 固定最大值，让图表比例更直观
-                                ticks: { display: false }, 
-                                pointLabels: { font: { size: 14, weight: 'bold' } } 
-                            } 
-                        },
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            }
-        }
+            if (globalChannel) {
+                globalChannel.send({ type: 'broadcast', event: 'check_success', payload: { name: data.name, score: score } });
+                globalChannel.track({ online_at: new Date().toISOString(), latest_check: { name: data.name, score: score } });
+            }
+            
+            document.getElementById('searchBtn').disabled = true;
+        }
 
-        // ==========================================
-        // 4. 数据加载与日志 (历史记录/弹幕)
-        // ==========================================
+       // ----------------------------------------------------
+        // 【修改版】绘制雷达图 (接收 color 参数)
+        // ----------------------------------------------------
+        function drawRadarChart(data, color) {
+            const ctx = document.getElementById('scoreChart');
+            
+            if (scoreChartInstance) {
+                scoreChartInstance.destroy();
+            }
+            
+            if (typeof Chart !== 'undefined') {
+                scoreChartInstance = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['语文', '数学', '英语'],
+                        datasets: [{
+                            label: '能力值',
+                            data: [data.chinese, data.math, data.english],
+                            
+                            // ✨ 应用动态颜色
+                            // 给颜色代码后面加 '66' (16进制)，让它变成半透明背景
+                            // 例如: #ffd700 -> #ffd70066
+                            backgroundColor: color + '66', 
+                            
+                            // 边框和点用纯色
+                            borderColor: color,
+                            pointBackgroundColor: '#fff',
+                            pointBorderColor: color,
+                            
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        layout: { padding: 10 },
+                        scales: { 
+                            r: { 
+                                beginAtZero: true, 
+                                max: 100, 
+                                ticks: { display: false }, 
+                                // 让角落的文字颜色也稍微深一点
+                                pointLabels: { font: { size: 14, weight: 'bold' }, color: '#555' } 
+                            } 
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+        }
 
-        // 加载历史查分记录
-        async function loadHistory() {
-            if (!supabaseClient) return;
-            const { data, error } = await supabaseClient
-                .from('query_logs')
-                .select('student_name, score') 
-                .order('created_at', { ascending: false })
-                .limit(50);
+        // ==========================================
+        // 4. 数据加载与日志 (历史记录/弹幕)
+        // ==========================================
 
-            if (data && data.length > 0) {
-                let hasValidData = false;
-                // 倒序处理，让旧的先上墙，新的后上墙
-                data.reverse().forEach(row => {
-                    if (!displayedNames.has(row.student_name)) {
-                        addToTicker(row.student_name, row.score);
-                        hasValidData = true;
-                    }
-                });
-                if (hasValidData) document.getElementById('tickerContainer').classList.add('ticker-active');
-            }
-        }
+        // 加载历史查分记录
+        async function loadHistory() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient
+                .from('query_logs')
+                .select('student_name, score') 
+                .order('created_at', { ascending: false })
+                .limit(50);
 
-        // 加载最近弹幕
-        async function loadRecentDanmaku() {
-            if (!supabaseClient) return;
-            const { data, error } = await supabaseClient
-                .from('danmaku_logs')
-                .select('text')
-                .order('created_at', { ascending: false })
-                .limit(10);
-            
-            if (data && data.length > 0) {
-                // 使用 setTimeout 制造错落感，模拟真实弹幕飘过
-                data.reverse().forEach((item, index) => {
-                    setTimeout(() => {
-                        shootDanmaku(item.text);
-                    }, index * 1200 + 1000); 
-                });
-            }
-        }
+            if (data && data.length > 0) {
+                let hasValidData = false;
+                // 倒序处理，让旧的先上墙，新的后上墙
+                data.reverse().forEach(row => {
+                    if (!displayedNames.has(row.student_name)) {
+                        addToTicker(row.student_name, row.score);
+                        hasValidData = true;
+                    }
+                });
+                if (hasValidData) document.getElementById('tickerContainer').classList.add('ticker-active');
+            }
+        }
 
-        // 记录查询动作到数据库
-        async function logQuery(name, score) {
-            if (!supabaseClient) return;
-            await supabaseClient.from('query_logs').insert({ student_name: name, score: score });
-        }
+        // 加载最近弹幕
+        async function loadRecentDanmaku() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient
+                .from('danmaku_logs')
+                .select('text')
+                .order('created_at', { ascending: false })
+                .limit(10);
+            
+            if (data && data.length > 0) {
+                // 使用 setTimeout 制造错落感，模拟真实弹幕飘过
+                data.reverse().forEach((item, index) => {
+                    setTimeout(() => {
+                        shootDanmaku(item.text);
+                    }, index * 1200 + 1000); 
+                });
+            }
+        }
 
-        // ==========================================
-        // 5. 交互与动画 (弹幕/反馈)
-        // ==========================================
+        // 记录查询动作到数据库
+        async function logQuery(name, score) {
+            if (!supabaseClient) return;
+            await supabaseClient.from('query_logs').insert({ student_name: name, score: score });
+        }
 
-        // 发送弹幕 (防连点 + 屏蔽词)
-        async function sendDanmaku() {
-            const input = document.getElementById('dmInput');
-            const btn = document.getElementById('dmBtn') || document.querySelector('.dm-btn'); 
-            const text = input.value.trim();
-            
-            // 冷却检查
-            if (btn.disabled) return;
-            if (!text) return;
-            if (text.length > 10) { showToast("⚠️ 只能发10个字以内哦！"); return; }
+        // ==========================================
+        // 5. 交互与动画 (弹幕/反馈)
+        // ==========================================
 
-            // 敏感词检查
-            const badWords = ['笨蛋', '傻瓜', '去死', '滚', '垃圾', '妈', '爸', '死', '弱智', 'sb', 'SB','喜欢','tmd','废物','爱','讨厌','城北','牛逼']; 
-            for (let word of badWords) {
-                if (text.includes(word)) {
-                    showToast("🚫 包含敏感词，已被凯文老师屏蔽！");
-                    shakeInput(input);
-                    return; 
-                }
-            }
+        // 发送弹幕 (防连点 + 屏蔽词)
+        async function sendDanmaku() {
+            const input = document.getElementById('dmInput');
+            const btn = document.getElementById('dmBtn') || document.querySelector('.dm-btn'); 
+            const text = input.value.trim();
+            
+            // 冷却检查
+            if (btn.disabled) return;
+            if (!text) return;
+            if (text.length > 10) { showToast("⚠️ 只能发10个字以内哦！"); return; }
 
-            // --- 冷却倒计时逻辑 ---
-            btn.disabled = true;
-            btn.style.backgroundColor = '#ccc'; 
-            btn.style.boxShadow = 'none'; 
-            let timeLeft = 3;
-            btn.innerText = `${timeLeft}s`; 
+            // 敏感词检查
+            const badWords = ['笨蛋', '傻瓜', '去死', '滚', '垃圾', '妈', '爸', '死', '弱智', 'sb', 'SB','喜欢','tmd','废物','爱','讨厌','城北','牛逼']; 
+            for (let word of badWords) {
+                if (text.includes(word)) {
+                    showToast("🚫 包含敏感词，已被凯文老师屏蔽！");
+                    shakeInput(input);
+                    return; 
+                }
+            }
 
-            const timer = setInterval(() => {
-                timeLeft--;
-                if (timeLeft > 0) {
-                    btn.innerText = `${timeLeft}s`;
-                } else {
-                    clearInterval(timer);
-                    btn.disabled = false;
-                    btn.innerText = "发射"; // 或者随机文案
-                    btn.style.backgroundColor = '#2ecc71'; 
-                    btn.style.boxShadow = '0 4px 10px rgba(46, 204, 113, 0.4)';
-                }
-            }, 1000);
+            // --- 冷却倒计时逻辑 ---
+            btn.disabled = true;
+            btn.style.backgroundColor = '#ccc'; 
+            btn.style.boxShadow = 'none'; 
+            let timeLeft = 3;
+            btn.innerText = `${timeLeft}s`; 
 
-            // 存入数据库 (异步，不阻塞)
-            if (supabaseClient) {
-                supabaseClient.from('danmaku_logs').insert({ text: text }).then(({ error }) => {
-                    if (error) console.error("弹幕保存失败:", error);
-                });
-            }
+            const timer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    btn.innerText = `${timeLeft}s`;
+                } else {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    btn.innerText = "发射"; // 或者随机文案
+                    btn.style.backgroundColor = '#2ecc71'; 
+                    btn.style.boxShadow = '0 4px 10px rgba(46, 204, 113, 0.4)';
+                }
+            }, 1000);
 
-            // 广播
-            if (globalChannel) { 
-                await globalChannel.send({ type: 'broadcast', event: 'danmaku', payload: { text: text } }); 
-                input.value = ''; 
-                // ✨【新增】发送成功后，自动收起胶囊，深藏功与名
-                toggleDmBar();
-            }
-        }
+            // 存入数据库 (异步，不阻塞)
+            if (supabaseClient) {
+                supabaseClient.from('danmaku_logs').insert({ text: text }).then(({ error }) => {
+                    if (error) console.error("弹幕保存失败:", error);
+                });
+            }
 
-        // 辅助函数：输入框抖动特效
-        function shakeInput(el) {
-            el.classList.add('shake');
-            setTimeout(() => el.classList.remove('shake'), 400);
-        }
+            // 广播
+            if (globalChannel) { 
+                await globalChannel.send({ type: 'broadcast', event: 'danmaku', payload: { text: text } }); 
+                input.value = ''; 
+                // ✨【新增】发送成功后，自动收起胶囊，深藏功与名
+                toggleDmBar();
+            }
+        }
 
-        // 辅助函数：安全播放音效
-        function playSound(id) {
-            const audio = document.getElementById(id);
-            if (audio) {
-                audio.currentTime = 0;
-                audio.play().catch(e => console.log("播放失败(需交互):", e));
-            }
-        }
+        // 辅助函数：输入框抖动特效
+        function shakeInput(el) {
+            el.classList.add('shake');
+            setTimeout(() => el.classList.remove('shake'), 400);
+        }
 
-        // ==========================================
-        // 6. UI 更新与特效展示
-        // ==========================================
+        // 辅助函数：安全播放音效
+        function playSound(id) {
+            const audio = document.getElementById(id);
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log("播放失败(需交互):", e));
+            }
+        }
 
-        // 显示报错信息
-        function showError(title, msg) {
-            const rDiv = document.getElementById('result');
-            const chartBox = document.getElementById('chartContainer');
+        // ==========================================
+        // 6. UI 更新与特效展示
+        // ==========================================
 
-            rDiv.style.display = "block";
-            // 报错时隐藏雷达图，防止留白
-            if(chartBox) chartBox.style.display = "none";
+        // 显示报错信息
+        function showError(title, msg) {
+            const rDiv = document.getElementById('result');
+            const chartBox = document.getElementById('chartContainer');
 
-            playSound('sfx-fail');
-            
-            document.getElementById('nameDisplay').innerHTML = title; 
-            document.getElementById('scoreDisplay').innerHTML = msg;  
-            rDiv.className = "result-area rank-c"; 
-            document.getElementById('honorDisplay').innerHTML = ""; 
-            
-            if (scoreChartInstance) scoreChartInstance.destroy();
-        }
+            rDiv.style.display = "block";
+            // 报错时隐藏雷达图，防止留白
+            if(chartBox) chartBox.style.display = "none";
 
-        // 计算等级并添加滚动条小胶囊
-        function addToTicker(name, score) {
-            if (displayedNames.has(name)) return; 
-            displayedNames.add(name);
+            playSound('sfx-fail');
+            
+            document.getElementById('nameDisplay').innerHTML = title; 
+            document.getElementById('scoreDisplay').innerHTML = msg;  
+            rDiv.className = "result-area rank-c"; 
+            document.getElementById('honorDisplay').innerHTML = ""; 
+            
+            if (scoreChartInstance) scoreChartInstance.destroy();
+        }
 
-            document.getElementById('tickerContainer').classList.add('ticker-active');
-            
-            // 内部函数：根据分数定等级
-            const getInfo = (s) => {
-                if (s === undefined || s === null) return { cls: 'a-tier', icon: '✅' };
-                if (s >= 270) return { cls: 's-tier', icon: '🥳' }; 
-                if (s >= 240) return { cls: 'a-tier', icon: '😊' }; 
-                if (s >= 210) return { cls: 'b-tier', icon: '😱' }; 
-                return { cls: 'c-tier', icon: '😭' }; 
-            };
-            
-            const info = getInfo(score);
-            const item = document.createElement('div');
-            item.className = `t-pill ${info.cls}`;
-            item.innerHTML = `<div class="emoji-box">${info.icon}</div> ${name} 已查询`;
-            
-            // 上下行交替插入
-            const trackId = toggleRow ? 'trackTop' : 'trackBottom';
-            document.getElementById(trackId).appendChild(item);
-            toggleRow = !toggleRow;
-        }
+        // 计算等级并添加滚动条小胶囊
+        function addToTicker(name, score) {
+            if (displayedNames.has(name)) return; 
+            displayedNames.add(name);
 
-        // 根据分数播放特效和声音
-        function playEffectByScore(score) {
-            const rDiv = document.getElementById('result');
-            const hDiv = document.getElementById('honorDisplay');
-            rDiv.className = "result-area"; 
-            
-            if (score >= 210) playSound('sfx-win');
-            else playSound('sfx-fail');
+            document.getElementById('tickerContainer').classList.add('ticker-active');
+            
+            // 内部函数：根据分数定等级
+            const getInfo = (s) => {
+                if (s === undefined || s === null) return { cls: 'a-tier', icon: '✅' };
+                if (s >= 270) return { cls: 's-tier', icon: '🥳' }; 
+                if (s >= 240) return { cls: 'a-tier', icon: '😊' }; 
+                if (s >= 210) return { cls: 'b-tier', icon: '😱' }; 
+                return { cls: 'c-tier', icon: '😭' }; 
+            };
+            
+            const info = getInfo(score);
+            const item = document.createElement('div');
+            item.className = `t-pill ${info.cls}`;
+            item.innerHTML = `<div class="emoji-box">${info.icon}</div> ${name} 已查询`;
+            
+            // 上下行交替插入
+            const trackId = toggleRow ? 'trackTop' : 'trackBottom';
+            document.getElementById(trackId).appendChild(item);
+            toggleRow = !toggleRow;
+        }
 
-            if (score >= 270) { 
-                rDiv.classList.add("rank-s"); hDiv.innerHTML = '<div class="honor-title" style="color:#854d0e">👑 荣誉时刻</div>'; animRankS(); 
-            } else if (score >= 240) { 
-                rDiv.classList.add("rank-a"); hDiv.innerHTML = '<div class="honor-title" style="color:#065f46">🌿 卓越成长</div>'; animRankA(); 
-            } else if (score >= 210) { 
-                rDiv.classList.add("rank-b"); hDiv.innerHTML = '<div class="honor-title" style="color:#1e40af">✨ 未来可期</div>'; animRankB(); 
-            } else { 
-                rDiv.classList.add("rank-c"); hDiv.innerHTML = '<div class="honor-title" style="color:#4b5563">🌱 厚积薄发</div>'; animRankC(); 
-            }
-        }
+        // 根据分数播放特效和声音
+        function playEffectByScore(score) {
+            const rDiv = document.getElementById('result');
+            const hDiv = document.getElementById('honorDisplay');
+            rDiv.className = "result-area"; 
+            
+            if (score >= 210) playSound('sfx-win');
+            else playSound('sfx-fail');
 
-        // 动画效果函数集 (Confetti)
-        function animRankS() { var end = Date.now() + 3000; (function frame() { confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffd700', '#ff0000'] }); confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffd700', '#ff0000'] }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
-        function animRankA() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#34d399', '#065f46'] }); }
-        function animRankB() { var defaults = { spread: 360, ticks: 50, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['star'], colors: ['#3b82f6', '#60a5fa', '#93c5fd'] }; function shoot() { confetti({ ...defaults, particleCount: 40, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 10, scalar: 0.75, shapes: ['circle'] }); } setTimeout(shoot, 0); setTimeout(shoot, 100); setTimeout(shoot, 200); }
-        function animRankC() { var end = Date.now() + 2000; (function frame() { confetti({ particleCount: 2, angle: 270, spread: 0, origin: { x: Math.random(), y: 0 }, colors: ['#9ca3af'], shapes: ['square'], gravity: 2, scalar: 0.8 }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
+            if (score >= 270) { 
+                rDiv.classList.add("rank-s"); hDiv.innerHTML = '<div class="honor-title" style="color:#854d0e">👑 荣誉时刻</div>'; animRankS(); 
+            } else if (score >= 240) { 
+                rDiv.classList.add("rank-a"); hDiv.innerHTML = '<div class="honor-title" style="color:#065f46">🌿 卓越成长</div>'; animRankA(); 
+            } else if (score >= 210) { 
+                rDiv.classList.add("rank-b"); hDiv.innerHTML = '<div class="honor-title" style="color:#1e40af">✨ 未来可期</div>'; animRankB(); 
+            } else { 
+                rDiv.classList.add("rank-c"); hDiv.innerHTML = '<div class="honor-title" style="color:#4b5563">🌱 厚积薄发</div>'; animRankC(); 
+            }
+        }
 
-        // ==========================================
-        // 7. 实时通讯 (在线人数/弹幕广播)
-        // ==========================================
-        
-        async function initLiveCount() {
-            if (!supabaseClient) return;
-            // 生成一个随机 ID 代表当前访客
-            let myId = localStorage.getItem('score_visitor_id') || ('user_' + Math.floor(Math.random() * 10000000));
-            localStorage.setItem('score_visitor_id', myId);
-            
-            // 订阅 'score_room' 频道
-            globalChannel = supabaseClient.channel('score_room', { config: { presence: { key: myId }, broadcast: { self: true } } });
-            
-            globalChannel
-                // 监听在线状态同步 (Sync)
-                .on('presence', { event: 'sync' }, () => {
-                    const state = globalChannel.presenceState();
-                    document.getElementById('onlineCount').innerText = Object.keys(state).length;
-                    // 如果有人在状态里带了最新查询信息，也上墙
-                    Object.values(state).forEach(users => { users.forEach(u => { if (u.latest_check) addToTicker(u.latest_check.name, u.latest_check.score); }); });
-                })
-                // 监听广播：有人查分成功
-                .on('broadcast', { event: 'check_success' }, (payload) => {
-                    const { name, score } = payload.payload;
-                    showToast("🎉 " + name + " 已查询成绩");
-                    addToTicker(name, score);
-                })
-                // 监听广播：有人发弹幕
-                .on('broadcast', { event: 'danmaku' }, (payload) => { shootDanmaku(payload.payload.text); })
-                .subscribe(async (status) => { if (status === 'SUBSCRIBED') await globalChannel.track({ online_at: new Date().toISOString() }); });
-        }
-        
-        // 渲染弹幕飘过动画
-        function shootDanmaku(text) {
-            const el = document.createElement('div'); el.innerText = text; el.className = 'dm-item';
-            // 随机颜色
-            el.style.color = ['#fff', '#ffeaa7', '#81ecec', '#fab1a0', '#a29bfe'][Math.floor(Math.random() * 5)];
-            // 随机高度位置 (30% - 70%)
-            el.style.top = Math.floor(Math.random() * 40 + 30) + '%';
-            // 随机飞行速度
-            el.style.animationDuration = Math.floor(Math.random() * 6 + 8) + 's';
-            document.body.appendChild(el);
-            // 动画结束后销毁 DOM，防止页面卡顿
-            el.addEventListener('animationend', () => { el.remove(); });
-        }
+        // 动画效果函数集 (Confetti)
+        function animRankS() { var end = Date.now() + 3000; (function frame() { confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#ffd700', '#ff0000'] }); confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#ffd700', '#ff0000'] }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
+        function animRankA() { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#34d399', '#065f46'] }); }
+        function animRankB() { var defaults = { spread: 360, ticks: 50, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['star'], colors: ['#3b82f6', '#60a5fa', '#93c5fd'] }; function shoot() { confetti({ ...defaults, particleCount: 40, scalar: 1.2, shapes: ['star'] }); confetti({ ...defaults, particleCount: 10, scalar: 0.75, shapes: ['circle'] }); } setTimeout(shoot, 0); setTimeout(shoot, 100); setTimeout(shoot, 200); }
+        function animRankC() { var end = Date.now() + 2000; (function frame() { confetti({ particleCount: 2, angle: 270, spread: 0, origin: { x: Math.random(), y: 0 }, colors: ['#9ca3af'], shapes: ['square'], gravity: 2, scalar: 0.8 }); if (Date.now() < end) requestAnimationFrame(frame); }()); }
 
-        // 显示顶部 Toast 提示
-        function showToast(text) {
-            const container = document.getElementById('notification-container');
-            const toast = document.createElement('div'); toast.className = 'toast';
-            toast.innerHTML = `<span>🔔</span> ${text}`; container.appendChild(toast);
-            setTimeout(() => { toast.remove(); }, 1200);
-        }
-        // 切换弹幕栏状态 (展开/收起)
+        // ==========================================
+        // 7. 实时通讯 (在线人数/弹幕广播)
+        // ==========================================
+        
+        async function initLiveCount() {
+            if (!supabaseClient) return;
+            // 生成一个随机 ID 代表当前访客
+            let myId = localStorage.getItem('score_visitor_id') || ('user_' + Math.floor(Math.random() * 10000000));
+            localStorage.setItem('score_visitor_id', myId);
+            
+            // 订阅 'score_room' 频道
+            globalChannel = supabaseClient.channel('score_room', { config: { presence: { key: myId }, broadcast: { self: true } } });
+            
+            globalChannel
+                // 监听在线状态同步 (Sync)
+                .on('presence', { event: 'sync' }, () => {
+                    const state = globalChannel.presenceState();
+                    document.getElementById('onlineCount').innerText = Object.keys(state).length;
+                    // 如果有人在状态里带了最新查询信息，也上墙
+                    Object.values(state).forEach(users => { users.forEach(u => { if (u.latest_check) addToTicker(u.latest_check.name, u.latest_check.score); }); });
+                })
+                // 监听广播：有人查分成功
+                .on('broadcast', { event: 'check_success' }, (payload) => {
+                    const { name, score } = payload.payload;
+                    showToast("🎉 " + name + " 已查询成绩");
+                    addToTicker(name, score);
+                })
+                // 监听广播：有人发弹幕
+                .on('broadcast', { event: 'danmaku' }, (payload) => { shootDanmaku(payload.payload.text); })
+                .subscribe(async (status) => { if (status === 'SUBSCRIBED') await globalChannel.track({ online_at: new Date().toISOString() }); });
+        }
+        
+        // 渲染弹幕飘过动画
+        function shootDanmaku(text) {
+            const el = document.createElement('div'); el.innerText = text; el.className = 'dm-item';
+            // 随机颜色
+            el.style.color = ['#fff', '#ffeaa7', '#81ecec', '#fab1a0', '#a29bfe'][Math.floor(Math.random() * 5)];
+            // 随机高度位置 (30% - 70%)
+            el.style.top = Math.floor(Math.random() * 40 + 30) + '%';
+            // 随机飞行速度
+            el.style.animationDuration = Math.floor(Math.random() * 6 + 8) + 's';
+            document.body.appendChild(el);
+            // 动画结束后销毁 DOM，防止页面卡顿
+            el.addEventListener('animationend', () => { el.remove(); });
+        }
+
+        // 显示顶部 Toast 提示
+        function showToast(text) {
+            const container = document.getElementById('notification-container');
+            const toast = document.createElement('div'); toast.className = 'toast';
+            toast.innerHTML = `<span>🔔</span> ${text}`; container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 1200);
+        }
+        // 切换弹幕栏状态 (展开/收起)
 function toggleDmBar() {
-    const bar = document.getElementById('dmBar');
-    const input = document.getElementById('dmInput');
+    const bar = document.getElementById('dmBar');
+    const input = document.getElementById('dmInput');
 
-    // 切换 class
-    bar.classList.toggle('active');
+    // 切换 class
+    bar.classList.toggle('active');
 
-    if (bar.classList.contains('active')) {
-        // 如果是展开，自动聚焦输入框
-        setTimeout(() => input.focus(), 300);
-    } else {
-        // 如果是收起，强制收起键盘
-        input.blur();
-    }
+    if (bar.classList.contains('active')) {
+        // 如果是展开，自动聚焦输入框
+        setTimeout(() => input.focus(), 300);
+    } else {
+        // 如果是收起，强制收起键盘
+        input.blur();
+    }
 }
-         //凯文老师结构优化笔记
-   /* 为了让你更清楚我做了什么调整，这里是几个关键点：
-    
-    分层管理：
-    
-    我把 JS 代码分成了 7 个区块（见注释）。
-    
-    配置区 -> 生命周期 -> 核心业务 -> 数据层 -> 交互层 -> UI层 -> 通讯层。
-    
-    这样以后你想改“弹幕逻辑”，直接找第 5 区块；想改“图表”，直接找第 6 区块，不用满屏找代码。
-    
-    抽离通用函数：
-    
-    把 shakeInput(el) 独立出来了。以前你在 checkGrade 里写了 4 次 classList.add('shake')...，现在只需要写一行，代码更干净。
-    
-    把 handleSuccess 独立出来了。checkGrade 函数太长了，把它拆分一下，逻辑更清晰。
-    
-    安全性与健壮性：
-    
-    补全了 playSound 函数的定义（之前你代码里调用了但没定义，会报错）。
-    
-    在 drawRadarChart 和 showError 里都加了 scoreChartInstance.destroy()，这是防止图表闪烁、重叠的关键。
-    
-    注释风格：
-    
-    所有的关键步骤都加了 // Step 1、// 情况A 这样的注释，方便你顺着逻辑读代码。
-    
-    这就是一个标准的、结构良好的单页应用（SPA）雏形了！继续加油！*/
-    </script>
+         //凯文老师结构优化笔记
+   /* 为了让你更清楚我做了什么调整，这里是几个关键点：
+    
+    分层管理：
+    
+    我把 JS 代码分成了 7 个区块（见注释）。
+    
+    配置区 -> 生命周期 -> 核心业务 -> 数据层 -> 交互层 -> UI层 -> 通讯层。
+    
+    这样以后你想改“弹幕逻辑”，直接找第 5 区块；想改“图表”，直接找第 6 区块，不用满屏找代码。
+    
+    抽离通用函数：
+    
+    把 shakeInput(el) 独立出来了。以前你在 checkGrade 里写了 4 次 classList.add('shake')...，现在只需要写一行，代码更干净。
+    
+    把 handleSuccess 独立出来了。checkGrade 函数太长了，把它拆分一下，逻辑更清晰。
+    
+    安全性与健壮性：
+    
+    补全了 playSound 函数的定义（之前你代码里调用了但没定义，会报错）。
+    
+    在 drawRadarChart 和 showError 里都加了 scoreChartInstance.destroy()，这是防止图表闪烁、重叠的关键。
+    
+    注释风格：
+    
+    所有的关键步骤都加了 // Step 1、// 情况A 这样的注释，方便你顺着逻辑读代码。
+    
+    这就是一个标准的、结构良好的单页应用（SPA）雏形了！继续加油！*/
+    </script>
 </body>
 </html>
-屏蔽敏感字的功能怎么失效了？
