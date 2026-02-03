@@ -56,29 +56,44 @@
             100% { transform: translateY(-30px); opacity: 0.3; } 
         }
 
-        /* 顶部滚动战报条 (Ticker) */
         .ticker-container { 
             position: fixed; top: 15px; left: 50%; 
-            transform: translateX(-50%); /* 经典的水平居中写法 */
+            /* 👇 改动1：用 translate3d 代替 translateX，开启硬件加速 */
+            transform: translate3d(-50%, 0, 0); 
             width: 94%; max-width: 650px; height: 80px; 
             background: rgba(255, 255, 255, 0.65); 
-            backdrop-filter: blur(12px); /* 毛玻璃特效 */
+            backdrop-filter: blur(12px); 
             border-radius: 20px; 
             z-index: 100; overflow: hidden; 
             display: flex; flex-direction: column; justify-content: space-evenly; 
-            /* 左右两侧渐变透明，让滚动看起来更自然 */
             mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); 
             -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent); 
             opacity: 0; transition: opacity 0.5s; 
+            /* 👇 改动2：告诉浏览器这里的透明度会变，提前准备 */
+            will-change: opacity;
         }
         .ticker-active { opacity: 1; } /* 有数据时才显示 */
         
-        /* 滚动动画定义 */
-        .ticker-row { display: flex; gap: 16px; width: max-content; align-items: center; height: 30px; }
+        .ticker-row { 
+            display: flex; gap: 16px; 
+            /* 👇 改动3：防止没内容时宽度为0 */
+            min-width: 100%; 
+            align-items: center; height: 30px; 
+            /* 👇 改动4：告诉浏览器这里会滚动 */
+            will-change: transform;
+        }
+        /* 滚动动画定义：改用 translate3d */
         .row-top { animation: scrollLeftToRight 25s linear infinite; }
-        .row-bottom { transform: translateX(100vw); animation: scrollRightToLeft 30s linear infinite; }
-        @keyframes scrollLeftToRight { 0% { transform: translateX(-100%); } 100% { transform: translateX(100vw); } }
-        @keyframes scrollRightToLeft { 0% { transform: translateX(100vw); } 100% { transform: translateX(-100%); } }
+        .row-bottom { transform: translate3d(100vw, 0, 0); animation: scrollRightToLeft 30s linear infinite; }
+        
+        @keyframes scrollLeftToRight { 
+            0% { transform: translate3d(-100%, 0, 0); } 
+            100% { transform: translate3d(100vw, 0, 0); } 
+        }
+        @keyframes scrollRightToLeft { 
+            0% { transform: translate3d(100vw, 0, 0); } 
+            100% { transform: translate3d(-100%, 0, 0); } 
+        }
 
         /* 战报小胶囊样式 */
         .t-pill { 
@@ -331,7 +346,7 @@
         </div>
 
         <div class="dm-content">
-            <input type="text" id="dmInput" class="dm-input" placeholder="✨ 写下你的魔法..." maxlength="10" enterkeyhint="send">
+            <input type="text" id="dmInput" class="dm-input" placeholder="✨ 写下你的魔法..." maxlength="15" enterkeyhint="send">
             <button id="dmBtn" class="dm-btn" onclick="sendDanmaku()">🚀</button>
         </div>
     </div>
@@ -544,27 +559,7 @@
         // 4. 数据加载与日志 (历史记录/弹幕)
         // ==========================================
 
-        // 加载历史查分记录
-        async function loadHistory() {
-            if (!supabaseClient) return;
-            const { data, error } = await supabaseClient
-                .from('query_logs')
-                .select('student_name, score') 
-                .order('created_at', { ascending: false })
-                .limit(50);
-
-            if (data && data.length > 0) {
-                let hasValidData = false;
-                // 倒序处理，让旧的先上墙，新的后上墙
-                data.reverse().forEach(row => {
-                    if (!displayedNames.has(row.student_name)) {
-                        addToTicker(row.student_name, row.score);
-                        hasValidData = true;
-                    }
-                });
-                if (hasValidData) document.getElementById('tickerContainer').classList.add('ticker-active');
-            }
-        }
+        
 
         // 加载最近弹幕
         async function loadRecentDanmaku() {
@@ -604,7 +599,7 @@
             // 冷却检查
             if (btn.disabled) return;
             if (!text) return;
-            if (text.length > 10) { showToast("⚠️ 只能发10个字以内哦！"); return; }
+            if (text.length > 15) { showToast("⚠️ 只能发15个字以内哦！"); return; }
 
             // 敏感词检查
             const badWords = ['笨蛋', '傻瓜', '去死', '滚', '垃圾', '妈', '爸', '死', '弱智', 'sb', 'SB','喜欢','tmd','废物','爱','讨厌','城北','牛逼']; 
@@ -690,14 +685,67 @@
             if (scoreChartInstance) scoreChartInstance.destroy();
         }
 
-        // 计算等级并添加滚动条小胶囊
+        // ----------------------------------------------------------------
+        // 👇 请把下面这一大段直接复制，替换掉你原来的 loadHistory 和 addToTicker
+        // ----------------------------------------------------------------
+
+        // 1. 加载历史查分记录 (修复显示延迟BUG版)
+        async function loadHistory() {
+            if (!supabaseClient) return;
+            const { data, error } = await supabaseClient
+                .from('query_logs')
+                .select('student_name, score') 
+                .order('created_at', { ascending: false })
+                .limit(50);
+
+            if (data && data.length > 0) {
+                // 使用 Fragment 批量操作，性能更好
+                const fragmentTop = document.createDocumentFragment();
+                const fragmentBottom = document.createDocumentFragment();
+                let hasValidData = false;
+
+                // 倒序处理
+                data.reverse().forEach(row => {
+                    if (!displayedNames.has(row.student_name)) {
+                        // 调用下方的通用创建函数
+                        createTickerElement(row.student_name, row.score, fragmentTop, fragmentBottom);
+                        displayedNames.add(row.student_name);
+                        hasValidData = true;
+                    }
+                });
+
+                // 一次性插入页面
+                document.getElementById('trackTop').appendChild(fragmentTop);
+                document.getElementById('trackBottom').appendChild(fragmentBottom);
+
+                // ✨ 关键修复：给浏览器 100毫秒 喘息时间去渲染 DOM，然后再显示出来
+                if (hasValidData) {
+                    setTimeout(() => {
+                        document.getElementById('tickerContainer').classList.add('ticker-active');
+                    }, 100);
+                }
+            }
+        }
+
+        // 2. 实时查分后上墙 (适配版)
         function addToTicker(name, score) {
             if (displayedNames.has(name)) return; 
             displayedNames.add(name);
 
+            // 直接获取容器
+            const trackTop = document.getElementById('trackTop');
+            const trackBottom = document.getElementById('trackBottom');
+
+            // 调用下方的通用创建函数
+            createTickerElement(name, score, trackTop, trackBottom);
+
+            // 确保容器可见
             document.getElementById('tickerContainer').classList.add('ticker-active');
-            
-            // 内部函数：根据分数定等级
+        }
+
+        // 3. 通用小函数：只负责生成 HTML (为了不重复写代码)
+        function createTickerElement(name, score, parentTop, parentBottom) {
+            // 内部判断等级
             const getInfo = (s) => {
                 if (s === undefined || s === null) return { cls: 'a-tier', icon: '✅' };
                 if (s >= 270) return { cls: 's-tier', icon: '🥳' }; 
@@ -711,10 +759,13 @@
             item.className = `t-pill ${info.cls}`;
             item.innerHTML = `<div class="emoji-box">${info.icon}</div> ${name} 已查询`;
             
-            // 上下行交替插入
-            const trackId = toggleRow ? 'trackTop' : 'trackBottom';
-            document.getElementById(trackId).appendChild(item);
-            toggleRow = !toggleRow;
+            // 轮流插入上/下轨道
+            if (toggleRow) {
+                parentTop.appendChild(item);
+            } else {
+                parentBottom.appendChild(item);
+            }
+            toggleRow = !toggleRow; // 切换下一行
         }
 
         // 根据分数播放特效和声音
