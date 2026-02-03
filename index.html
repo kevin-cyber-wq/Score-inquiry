@@ -369,6 +369,8 @@
     position: absolute; top: 30px; right: 30px;
     color: #fff; font-size: 30px; cursor: pointer; opacity: 0.7;
 }
+
+
     </style>
 </head>
 
@@ -413,7 +415,7 @@
                 <canvas id="scoreChart"></canvas>
             </div>
             <div id="honorDisplay"></div>
-            <button class="btn-share" onclick="generateShareImage()">📸 生成魔法战报</button>
+            <button id="shareBtn" class="btn-share" onclick="generateShareImage()" style="display: none;">📸 生成魔法战报</button>
         </div>
         
         <div class="copyright">&copy; 2026 Designed by Kevin</div>
@@ -578,6 +580,9 @@
         function handleSuccess(data, chartBox) {
             const resultDiv = document.getElementById('result');
             resultDiv.style.display = "block";
+
+            // 👇【新增】成功查到分，显示分享按钮
+    document.getElementById('shareBtn').style.display = 'block';
             
             if(chartBox) chartBox.style.display = "block";
 
@@ -791,6 +796,8 @@ function drawRadarChart(data, color) {
             const chartBox = document.getElementById('chartContainer');
 
             rDiv.style.display = "block";
+            // 👇【新增】报错时，强制隐藏分享按钮
+    document.getElementById('shareBtn').style.display = 'none';
             // 报错时隐藏雷达图，防止留白
             if(chartBox) chartBox.style.display = "none";
 
